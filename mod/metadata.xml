@@ -7,8 +7,11 @@
 
         In the base game, you can play with those floors via the debug console but boss waves and entire Gehenna and Corpse floors are missing.
         So I added the missing boss waves and 120 different waves for Gehenna and Corpse!
-        I tried to copy the style of the other waves are are currently in the game.
+        I tried to copy the style of the other waves that are currently in the game.
         Downpour, Dross, Mines, Ashpit and Mausoleum enemy waves are the original waves currently in the game, i haven't touched them.
+
+        Alt path floors will appear one floor later than their original stage ID in greed mode, with a full alt path run you can have something like that :
+        Basement - Downpour - Mines - Mausoleum - Corpse - Shop
 
         [b]Q and A:[/b]
 
@@ -22,11 +25,17 @@
         [b]Where Rotgut?[/b]
         Rotgut makes the game crash when you enter phase 2. It is replaced by 2 red Wormwoods (yes, the one from Antibirth. Files are currently in the game so i used them)
 
+        [b]I typed &quot;stage 1c&quot; in the console but i'm not in Downpour.[/b]
+        I use the &quot;reseed&quot; command once per floor, so you'll have to type your stage command twice, sorry about that.
+
+        [b]Is Henry here?[/b]
+        Yes, i added a very rare wave in Dross with Henry!
+
         Thanks to Microsorex for letting me use his original code.
 
         If there's some bugs or if you find some waves too easy or too hard, you can contact me on Discord (Gamonymous#1546)
     </description>
-    <version>1.2</version>
+    <version>1.4</version>
     <visibility>Public</visibility>
     <tag id="Rooms"/>
     <tag id="Floors"/>

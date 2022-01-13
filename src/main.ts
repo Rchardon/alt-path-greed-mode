@@ -9,10 +9,12 @@ const MOD_NAME = "alt-path-greed-mode";
 const CATEGORY_NAME = "Alt Path Greed Mode";
 
 const v = {
-  floorReseeded: [false, false, false, false],
+  floorReseeded: [false, false, false, false, false],
   persistent: {
     config: new Config(),
   },
+  oldStage: 0,
+  oldStageType: 0,
 };
 
 export const config = v.persistent.config;
@@ -46,27 +48,92 @@ function postNewLevel() {
   if (Game().IsGreedMode()) {
     const level = Game().GetLevel();
     const stage = level.GetStage();
-    const stage123StageTypes = [0, 1, 2, 4, 5];
-    const stage4StageTypes = [0, 1, 2, 4];
+    const stageType = level.GetStageType();
 
-    if (stage <= 3 && !v.floorReseeded[stage - 1]) {
-      v.floorReseeded[stage - 1] = true;
-      level.SetStage(
-        stage,
-        config.altPathOnly
-          ? math.random(4, 5)
-          : stage123StageTypes[math.random(0, 4)],
-      );
-      Isaac.ExecuteCommand("reseed");
-    } else if (stage === 4 && !v.floorReseeded[stage - 1]) {
-      v.floorReseeded[stage - 1] = true;
-      level.SetStage(
-        stage,
-        config.altPathOnly ? 4 : stage4StageTypes[math.random(0, 3)],
-      );
-      Isaac.ExecuteCommand("reseed");
+    Isaac.DebugString(
+      `floor ${getEffectiveGreedModeStage().toString()} reseeded ${
+        v.floorReseeded[getEffectiveGreedModeStage() - 2]
+      }`,
+    );
+
+    if (
+      stage === 1 &&
+      (stageType === 0 || stageType === 1 || stageType === 2)
+    ) {
+      v.oldStage = stage;
+      v.oldStageType = stageType;
+    } else if (
+      (stage !== 1 &&
+        stage <= 5 &&
+        stageType !== 4 &&
+        stageType !== 5 &&
+        !v.floorReseeded[getEffectiveGreedModeStage() - 2]) ||
+      (v.oldStage === stage - 1 &&
+        (v.oldStageType === 4 || v.oldStageType === 5) &&
+        v.floorReseeded[getEffectiveGreedModeStage() - 2])
+    ) {
+      reseed(stage, stageType, level);
     }
   }
+}
+
+function reseed(stage: number, stageType: number, level: Level) {
+  const stage123StageTypes = [0, 1, 2, 4, 5];
+  const stage4StageTypes = [0, 1, 2, 4];
+
+  Isaac.DebugString(`stage ${stage.toString()}`);
+  Isaac.DebugString(`stageType ${level.GetStageType().toString()}`);
+  Isaac.DebugString(`oldstage ${v.oldStage.toString()}`);
+  Isaac.DebugString(`oldstageType ${v.oldStageType.toString()}`);
+  let newStageType;
+
+  if (config.altPathOnly) {
+    if (stage === 4) {
+      newStageType = 4;
+    } else {
+      newStageType = math.random(4, 5);
+    }
+  } else if (v.oldStage === 4 && v.oldStageType === 4) {
+    newStageType = 0;
+  } else if (stage === 4 || stage === 5) {
+    newStageType = stage4StageTypes[math.random(0, 3)];
+  } else {
+    newStageType = stage123StageTypes[math.random(0, 4)];
+  }
+
+  let newStage;
+
+  if (v.oldStage === 4 && v.oldStageType === 4) {
+    newStage = 6;
+  } else if (
+    (newStageType === 4 || newStageType === 5) &&
+    (v.oldStageType === 0 || v.oldStageType === 1 || v.oldStageType === 2)
+  ) {
+    newStage = v.oldStage;
+  } else if (
+    (v.oldStageType === 4 || v.oldStageType === 5) &&
+    (newStageType === 0 || newStageType === 1 || newStageType === 2)
+  ) {
+    newStage = v.oldStage + 2;
+  } else if (
+    stage === v.oldStage &&
+    stageType === v.oldStageType &&
+    !v.floorReseeded[getEffectiveGreedModeStage() - 2]
+  ) {
+    newStage = newStageType === 4 || newStageType === 5 ? stage - 1 : stage;
+  } else {
+    newStage = v.oldStage + 1;
+  }
+
+  v.floorReseeded[getEffectiveGreedModeStage() - 2] = true;
+
+  Isaac.DebugString(`newStage ${newStage.toString()}`);
+  Isaac.DebugString(`newStageType ${newStageType.toString()}`);
+
+  level.SetStage(newStage, newStageType);
+  v.oldStage = newStage;
+  v.oldStageType = newStageType;
+  Isaac.ExecuteCommand("reseed");
 }
 
 function postNPCInit(npc: EntityNPC) {
@@ -160,3 +227,15 @@ const MAJOR: ConfigDescriptions = [
     ],
   ],
 ];
+
+function getEffectiveGreedModeStage(): number {
+  const level = Game().GetLevel();
+  const stage = level.GetStage();
+  const stageType = level.GetStageType();
+
+  if (stageType === 4 || stageType === 5) {
+    return stage + 1;
+  }
+
+  return stage;
+}

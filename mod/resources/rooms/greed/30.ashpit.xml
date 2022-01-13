@@ -3546,18 +3546,7 @@
 			<entity type="915" variant="0" subtype="0" weight="1.0"/>
 		</spawn>
 	</room>
-	<room variant="2" name="boss" type="5" subtype="0" shape="4" width="13" height="14" difficulty="1" weight="0.5">
-		<door exists="True" x="-1" y="3"/>
-		<door exists="True" x="-1" y="10"/>
-		<door exists="True" x="6" y="-1"/>
-		<door exists="True" x="6" y="14"/>
-		<door exists="True" x="13" y="3"/>
-		<door exists="True" x="13" y="10"/>
-		<spawn x="6" y="11">
-			<entity type="269" variant="1" subtype="0" weight="1.0"/>
-		</spawn>
-	</room>
-	<room variant="3" name="boss" type="5" subtype="0" shape="4" width="13" height="14" difficulty="1" weight="1.0">
+	<room variant="2" name="boss" type="5" subtype="0" shape="4" width="13" height="14" difficulty="1" weight="1.0">
 		<door exists="True" x="-1" y="3"/>
 		<door exists="True" x="-1" y="10"/>
 		<door exists="True" x="6" y="-1"/>
@@ -3571,7 +3560,7 @@
 			<entity type="48" variant="1" subtype="0" weight="1.0"/>
 		</spawn>
 	</room>
-	<room variant="4" name="boss med" type="5" subtype="0" shape="4" width="13" height="14" difficulty="5" weight="0.5">
+	<room variant="3" name="boss med" type="5" subtype="0" shape="4" width="13" height="14" difficulty="5" weight="0.5">
 		<door exists="True" x="-1" y="3"/>
 		<door exists="True" x="-1" y="10"/>
 		<door exists="True" x="6" y="-1"/>
@@ -3582,7 +3571,7 @@
 			<entity type="907" variant="0" subtype="0" weight="1.0"/>
 		</spawn>
 	</room>
-	<room variant="5" name="boss med" type="5" subtype="0" shape="4" width="13" height="14" difficulty="5" weight="1.0">
+	<room variant="4" name="boss med" type="5" subtype="0" shape="4" width="13" height="14" difficulty="5" weight="1.0">
 		<door exists="True" x="-1" y="3"/>
 		<door exists="True" x="-1" y="10"/>
 		<door exists="True" x="6" y="-1"/>
@@ -3623,7 +3612,7 @@
 			<entity type="19" variant="3" subtype="0" weight="1.0"/>
 		</spawn>
 	</room>
-	<room variant="6" name="boss med" type="5" subtype="0" shape="4" width="13" height="14" difficulty="5" weight="1.0">
+	<room variant="5" name="boss med" type="5" subtype="0" shape="4" width="13" height="14" difficulty="5" weight="1.0">
 		<door exists="True" x="-1" y="3"/>
 		<door exists="True" x="-1" y="10"/>
 		<door exists="True" x="6" y="-1"/>
@@ -3667,7 +3656,7 @@
 			<entity type="828" variant="0" subtype="0" weight="1.0"/>
 		</spawn>
 	</room>
-	<room variant="7" name="boss med" type="5" subtype="0" shape="4" width="13" height="14" difficulty="5" weight="1.0">
+	<room variant="6" name="boss med" type="5" subtype="0" shape="4" width="13" height="14" difficulty="5" weight="1.0">
 		<door exists="True" x="-1" y="3"/>
 		<door exists="True" x="-1" y="10"/>
 		<door exists="True" x="6" y="-1"/>
@@ -3684,7 +3673,7 @@
 			<entity type="25" variant="4" subtype="0" weight="1.0"/>
 		</spawn>
 	</room>
-	<room variant="8" name="boss med" type="5" subtype="0" shape="4" width="13" height="14" difficulty="5" weight="1.0">
+	<room variant="7" name="boss med" type="5" subtype="0" shape="4" width="13" height="14" difficulty="5" weight="1.0">
 		<door exists="True" x="-1" y="3"/>
 		<door exists="True" x="-1" y="10"/>
 		<door exists="True" x="6" y="-1"/>
@@ -3701,7 +3690,7 @@
 			<entity type="23" variant="3" subtype="0" weight="1.0"/>
 		</spawn>
 	</room>
-	<room variant="9" name="boss med" type="5" subtype="0" shape="4" width="13" height="14" difficulty="5" weight="1.0">
+	<room variant="8" name="boss med" type="5" subtype="0" shape="4" width="13" height="14" difficulty="5" weight="1.0">
 		<door exists="True" x="-1" y="3"/>
 		<door exists="True" x="-1" y="10"/>
 		<door exists="True" x="6" y="-1"/>
@@ -3715,7 +3704,7 @@
 			<entity type="881" variant="1" subtype="0" weight="1.0"/>
 		</spawn>
 	</room>
-	<room variant="10" name="boss med" type="5" subtype="0" shape="4" width="13" height="14" difficulty="5" weight="1.0">
+	<room variant="9" name="boss med" type="5" subtype="0" shape="4" width="13" height="14" difficulty="5" weight="1.0">
 		<door exists="True" x="-1" y="3"/>
 		<door exists="True" x="-1" y="10"/>
 		<door exists="True" x="6" y="-1"/>
@@ -3729,7 +3718,7 @@
 			<entity type="269" variant="1" subtype="0" weight="1.0"/>
 		</spawn>
 	</room>
-	<room variant="11" name="boss hard" type="5" subtype="0" shape="4" width="13" height="14" difficulty="10" weight="1.0">
+	<room variant="10" name="boss hard" type="5" subtype="0" shape="4" width="13" height="14" difficulty="10" weight="1.0">
 		<door exists="True" x="-1" y="3"/>
 		<door exists="True" x="-1" y="10"/>
 		<door exists="True" x="6" y="-1"/>
@@ -3746,7 +3735,7 @@
 			<entity type="830" variant="0" subtype="0" weight="1.0"/>
 		</spawn>
 	</room>
-	<room variant="12" name="boss hard" type="5" subtype="0" shape="4" width="13" height="14" difficulty="10" weight="0.5">
+	<room variant="11" name="boss hard" type="5" subtype="0" shape="4" width="13" height="14" difficulty="10" weight="0.5">
 		<door exists="True" x="-1" y="3"/>
 		<door exists="True" x="-1" y="10"/>
 		<door exists="True" x="6" y="-1"/>
@@ -3760,7 +3749,7 @@
 			<entity type="403" variant="0" subtype="0" weight="1.0"/>
 		</spawn>
 	</room>
-	<room variant="13" name="boss hard" type="5" subtype="0" shape="4" width="13" height="14" difficulty="10" weight="0.5">
+	<room variant="12" name="boss hard" type="5" subtype="0" shape="4" width="13" height="14" difficulty="10" weight="0.5">
 		<door exists="True" x="-1" y="3"/>
 		<door exists="True" x="-1" y="10"/>
 		<door exists="True" x="6" y="-1"/>
@@ -3780,7 +3769,7 @@
 			<entity type="28" variant="2" subtype="0" weight="1.0"/>
 		</spawn>
 	</room>
-	<room variant="14" name="boss hard" type="5" subtype="0" shape="4" width="13" height="14" difficulty="10" weight="1.0">
+	<room variant="13" name="boss hard" type="5" subtype="0" shape="4" width="13" height="14" difficulty="10" weight="1.0">
 		<door exists="True" x="-1" y="3"/>
 		<door exists="True" x="-1" y="10"/>
 		<door exists="True" x="6" y="-1"/>
@@ -3815,7 +3804,7 @@
 			<entity type="23" variant="3" subtype="0" weight="1.0"/>
 		</spawn>
 	</room>
-	<room variant="15" name="boss hard" type="5" subtype="0" shape="4" width="13" height="14" difficulty="10" weight="1.0">
+	<room variant="14" name="boss hard" type="5" subtype="0" shape="4" width="13" height="14" difficulty="10" weight="1.0">
 		<door exists="True" x="-1" y="3"/>
 		<door exists="True" x="-1" y="10"/>
 		<door exists="True" x="6" y="-1"/>
@@ -3838,7 +3827,7 @@
 			<entity type="881" variant="1" subtype="0" weight="1.0"/>
 		</spawn>
 	</room>
-	<room variant="16" name="boss hard" type="5" subtype="0" shape="4" width="13" height="14" difficulty="10" weight="1.0">
+	<room variant="15" name="boss hard" type="5" subtype="0" shape="4" width="13" height="14" difficulty="10" weight="1.0">
 		<door exists="True" x="-1" y="3"/>
 		<door exists="True" x="-1" y="10"/>
 		<door exists="True" x="6" y="-1"/>
