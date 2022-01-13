@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata>
+    <name>Alt path in Greed Mode</name>
+    <directory>alt-path-greed-mode</directory>
+    <id>2717876263</id>
+    <description>[h1][b]Fully playable alt path for Greed Mode![/b][/h1]
+
+        In the base game, you can play with those floors via the debug console but boss waves and entire Gehenna and Corpse floors are missing.
+        So I added the missing boss waves and 120 different waves for Gehenna and Corpse!
+        I tried to copy the style of the other waves are are currently in the game.
+        Downpour, Dross, Mines, Ashpit and Mausoleum enemy waves are the original waves currently in the game, i haven't touched them.
+
+        [b]Q and A:[/b]
+
+        [b]How does it work, I can only play alt path or are the new floors mixed with the existing ones ?[/b]
+        You can do both! There's an option in Mod Config Menu to play like you want.
+
+        [b]Clog spawned a poop on the greed button, i cannot launch last wave![/b]
+        It's a vanilla bug, i can't do anything about that and I don't want to remove Clog sorry.
+        Like you can use Ehwaz or We Need to Go Deeper to spawn a trapdoor on the Greed button. Hope it will be patched soon!
+
+        [b]Where Rotgut?[/b]
+        Rotgut makes the game crash when you enter phase 2. It is replaced by 2 red Wormwoods (yes, the one from Antibirth. Files are currently in the game so i used them)
+
+        Thanks to Microsorex for letting me use his original code.
+
+        If there's some bugs or if you find some waves too easy or too hard, you can contact me on Discord (Gamonymous#1546)
+    </description>
+    <version>1.2</version>
+    <visibility>Public</visibility>
+    <tag id="Rooms"/>
+    <tag id="Floors"/>
+    <tag id="Tweaks"/>
+    <tag id="Graphics"/>
+</metadata>
