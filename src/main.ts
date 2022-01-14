@@ -50,12 +50,6 @@ function postNewLevel() {
     const stage = level.GetStage();
     const stageType = level.GetStageType();
 
-    Isaac.DebugString(
-      `floor ${getEffectiveGreedModeStage().toString()} reseeded ${
-        v.floorReseeded[getEffectiveGreedModeStage() - 2]
-      }`,
-    );
-
     if (
       stage === 1 &&
       (stageType === 0 || stageType === 1 || stageType === 2)
@@ -81,10 +75,6 @@ function reseed(stage: number, stageType: number, level: Level) {
   const stage123StageTypes = [0, 1, 2, 4, 5];
   const stage4StageTypes = [0, 1, 2, 4];
 
-  Isaac.DebugString(`stage ${stage.toString()}`);
-  Isaac.DebugString(`stageType ${level.GetStageType().toString()}`);
-  Isaac.DebugString(`oldstage ${v.oldStage.toString()}`);
-  Isaac.DebugString(`oldstageType ${v.oldStageType.toString()}`);
   let newStageType;
 
   if (config.altPathOnly) {
@@ -126,9 +116,6 @@ function reseed(stage: number, stageType: number, level: Level) {
   }
 
   v.floorReseeded[getEffectiveGreedModeStage() - 2] = true;
-
-  Isaac.DebugString(`newStage ${newStage.toString()}`);
-  Isaac.DebugString(`newStageType ${newStageType.toString()}`);
 
   level.SetStage(newStage, newStageType);
   v.oldStage = newStage;
