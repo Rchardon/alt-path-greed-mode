@@ -18,6 +18,12 @@
         [b]How does it work, I can only play alt path or are the new floors mixed with the existing ones ?[/b]
         You can do both! There's an option in Mod Config Menu to play like you want.
 
+        [b]Is it compatible with [url=https://steamcommunity.com/sharedfiles/filedetails/?id=2626756137]Greed Mode Improved Repentance[/url] ?[/b]
+        Yes.
+
+        [b]Are there double item rooms ?[/b]
+        Yes, one visible and one blind item like in normal mode.
+
         [b]Clog spawned a poop on the greed button, i cannot launch last wave![/b]
         It's a vanilla bug, i can't do anything about that and I don't want to remove Clog sorry.
         Like you can use Ehwaz or We Need to Go Deeper to spawn a trapdoor on the Greed button. Hope it will be patched soon!
@@ -28,6 +34,9 @@
         [b]I typed &quot;stage 1c&quot; in the console but i'm not in Downpour.[/b]
         I use the &quot;reseed&quot; command once per floor, so you'll have to type your stage command twice, sorry about that.
 
+        [b]Do you plan to add Cathedral ?[/b]
+        I want to! But it might not be possible since there's no file for it nor is coded in the game.
+
         [b]Is Henry here?[/b]
         Yes, i added a very rare wave in Dross with Henry!
 
@@ -35,10 +44,11 @@
 
         If there's some bugs or if you find some waves too easy or too hard, you can contact me on Discord (Gamonymous#1546)
     </description>
-    <version>1.5</version>
+    <version>1.6</version>
     <visibility>Public</visibility>
     <tag id="Rooms"/>
     <tag id="Floors"/>
+    <tag id="Bosses"/>
     <tag id="Tweaks"/>
     <tag id="Graphics"/>
 </metadata>

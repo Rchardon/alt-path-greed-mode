@@ -28,7 +28,7 @@ export function main(): void {
 
   saveDataManager("modConfigMenu", v);
 
-  registerSubMenuConfig("Major", MAJOR);
+  registerSubMenuConfig("Settings", SETTINGS);
 
   mod.AddCallback(ModCallbacks.MC_POST_PLAYER_INIT, postPlayerInit);
   mod.AddCallback(ModCallbacks.MC_POST_NEW_LEVEL, postNewLevel);
@@ -208,7 +208,7 @@ export type ConfigDescriptions = Array<
   [keyof Config | null, [ModConfigMenuOptionType, string, string, string]]
 >;
 
-const MAJOR: ConfigDescriptions = [
+const SETTINGS: ConfigDescriptions = [
   [
     "altPathOnly",
     [
