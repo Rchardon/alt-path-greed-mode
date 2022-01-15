@@ -9,12 +9,13 @@ const MOD_NAME = "alt-path-greed-mode";
 const CATEGORY_NAME = "Alt Path Greed Mode";
 
 const v = {
-  floorReseeded: [false, false, false, false, false],
+  floorReseeded: [false, false, false, false],
   persistent: {
     config: new Config(),
   },
   oldStage: 0,
   oldStageType: 0,
+  lastFloorReseeded: false,
 };
 
 export const config = v.persistent.config;
@@ -61,19 +62,22 @@ function postNewLevel() {
         stage <= 5 &&
         stageType !== 4 &&
         stageType !== 5 &&
-        !v.floorReseeded[getEffectiveGreedModeStage() - 2]) ||
+        !v.floorReseeded[getEffectiveGreedModeStage() - 2] &&
+        !v.lastFloorReseeded) ||
       (v.oldStage === stage - 1 &&
         (v.oldStageType === 4 || v.oldStageType === 5) &&
         v.floorReseeded[getEffectiveGreedModeStage() - 2])
     ) {
       reseed(stage, stageType, level);
+    } else {
+      v.lastFloorReseeded = false;
     }
   }
 }
 
 function reseed(stage: number, stageType: number, level: Level) {
   const stage123StageTypes = [0, 1, 2, 4, 5];
-  const stage4StageTypes = [0, 1, 2, 4];
+  const stage5StageTypes = [0, 4];
 
   let newStageType;
 
@@ -86,7 +90,7 @@ function reseed(stage: number, stageType: number, level: Level) {
   } else if (v.oldStage === 4 && v.oldStageType === 4) {
     newStageType = 0;
   } else if (stage === 4 || stage === 5) {
-    newStageType = stage4StageTypes[math.random(0, 3)];
+    newStageType = stage5StageTypes[math.random(0, 1)];
   } else {
     newStageType = stage123StageTypes[math.random(0, 4)];
   }
@@ -116,6 +120,7 @@ function reseed(stage: number, stageType: number, level: Level) {
   }
 
   v.floorReseeded[getEffectiveGreedModeStage() - 2] = true;
+  v.lastFloorReseeded = true;
 
   level.SetStage(newStage, newStageType);
   v.oldStage = newStage;
