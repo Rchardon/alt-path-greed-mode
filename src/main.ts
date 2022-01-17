@@ -137,6 +137,7 @@ function postNPCInit(npc: EntityNPC) {
     return;
   }
 
+  // Wormwood
   if (
     Game().IsGreedMode() &&
     stage === 4 &&
@@ -238,6 +239,7 @@ function postNewRoom() {
   const room = Game().GetRoom();
   const roomType = room.GetType();
 
+  // Respawn the Greed plate in case it was replaced by a trapdoor or a poop spawned by Clog
   if (roomType === 1 && IsGreedMode) {
     room.SpawnGridEntity(112, 20, 2, 0, 0);
   }
