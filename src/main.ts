@@ -33,6 +33,7 @@ export function main(): void {
   mod.AddCallback(ModCallbacks.MC_POST_PLAYER_INIT, postPlayerInit);
   mod.AddCallback(ModCallbacks.MC_POST_NEW_LEVEL, postNewLevel);
   mod.AddCallback(ModCallbacks.MC_POST_NPC_INIT, postNPCInit);
+  mod.AddCallback(ModCallbacks.MC_POST_NEW_ROOM, postNewRoom);
 
   // Print an initialization message to the "log.txt" file
   Isaac.DebugString(`${MOD_NAME} initialized.`);
@@ -230,4 +231,14 @@ function getEffectiveGreedModeStage(): number {
   }
 
   return stage;
+}
+
+function postNewRoom() {
+  const IsGreedMode = Game().IsGreedMode();
+  const room = Game().GetRoom();
+  const roomType = room.GetType();
+
+  if (roomType === 1 && IsGreedMode) {
+    room.SpawnGridEntity(112, 20, 2, 0, 0);
+  }
 }
