@@ -238,9 +238,17 @@ function postNewRoom() {
   const IsGreedMode = Game().IsGreedMode();
   const room = Game().GetRoom();
   const roomType = room.GetType();
+  const numGreedWave = Game().GetLevel().GreedModeWave;
+  const GameDifficulty = Game().Difficulty;
 
   // Respawn the Greed plate in case it was replaced by a trapdoor or a poop spawned by Clog
-  if (roomType === 1 && IsGreedMode) {
+  if (
+    roomType === 1 &&
+    IsGreedMode &&
+    ((numGreedWave <= 11 &&
+      GameDifficulty === Difficulty.DIFFICULTY_GREEDIER) ||
+      (numGreedWave <= 10 && GameDifficulty === Difficulty.DIFFICULTY_GREED))
+  ) {
     room.SpawnGridEntity(112, 20, 2, 0, 0);
   }
 }
