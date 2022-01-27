@@ -1,4 +1,5 @@
 import {
+  getRoomVariant,
   saveDataManager,
   saveDataManagerSave,
   upgradeMod,
@@ -235,16 +236,21 @@ function getEffectiveGreedModeStage(): number {
 }
 
 function postNewRoom() {
+  const level = Game().GetLevel();
   const IsGreedMode = Game().IsGreedMode();
+  const stage = level.GetStage();
   const room = Game().GetRoom();
   const roomType = room.GetType();
-  const numGreedWave = Game().GetLevel().GreedModeWave;
+  const numGreedWave = level.GreedModeWave;
   const GameDifficulty = Game().Difficulty;
+  const roomVariant = getRoomVariant();
 
   // Respawn the Greed plate in case it was replaced by a trapdoor or a poop spawned by Clog
   if (
     roomType === 1 &&
     IsGreedMode &&
+    stage !== LevelStage.STAGE7_GREED &&
+    roomVariant > 999 &&
     ((numGreedWave <= 11 &&
       GameDifficulty === Difficulty.DIFFICULTY_GREEDIER) ||
       (numGreedWave <= 10 && GameDifficulty === Difficulty.DIFFICULTY_GREED))
