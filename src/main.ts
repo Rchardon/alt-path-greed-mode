@@ -11,6 +11,7 @@ import { Config } from "./types/Config";
 
 const MOD_NAME = "alt-path-greed-mode";
 const CATEGORY_NAME = "Alt Path Greed Mode";
+const GREED_PLATE_GRID_INDEX = 112;
 
 const v = {
   floorReseeded: [false, false, false, false],
@@ -263,14 +264,14 @@ function postNewRoom() {
   ) {
     const gridPoops = getGridEntities(GridEntityType.GRID_POOP);
     for (const gridPoop of gridPoops) {
-      if (gridPoop.GetGridIndex() === 112) {
+      if (gridPoop.GetGridIndex() === GREED_PLATE_GRID_INDEX) {
         removeGridEntity(gridPoop, true);
       }
     }
     spawnGridEntityWithVariant(
       GridEntityType.GRID_PRESSURE_PLATE,
       PressurePlateVariant.GREED_PLATE,
-      112,
+      GREED_PLATE_GRID_INDEX,
     );
   }
 }
