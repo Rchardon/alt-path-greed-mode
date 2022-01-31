@@ -1,7 +1,10 @@
 import {
+  getGridEntities,
   getRoomVariant,
+  removeGridEntity,
   saveDataManager,
   saveDataManagerSave,
+  spawnGridEntityWithVariant,
   upgradeMod,
 } from "isaacscript-common";
 import { Config } from "./types/Config";
@@ -249,12 +252,25 @@ function postNewRoom() {
   if (
     roomType === 1 &&
     IsGreedMode &&
-    stage !== LevelStage.STAGE7_GREED &&
+    stage === LevelStage.STAGE1_GREED &&
     roomVariant > 999 &&
     ((numGreedWave <= 11 &&
+      numGreedWave >= 10 &&
       GameDifficulty === Difficulty.DIFFICULTY_GREEDIER) ||
-      (numGreedWave <= 10 && GameDifficulty === Difficulty.DIFFICULTY_GREED))
+      (numGreedWave <= 10 &&
+        numGreedWave >= 9 &&
+        GameDifficulty === Difficulty.DIFFICULTY_GREED))
   ) {
-    room.SpawnGridEntity(112, 20, 2, 0, 0);
+    const gridPoops = getGridEntities(GridEntityType.GRID_POOP);
+    for (const gridPoop of gridPoops) {
+      if (gridPoop.GetGridIndex() === 112) {
+        removeGridEntity(gridPoop, true);
+      }
+    }
+    spawnGridEntityWithVariant(
+      GridEntityType.GRID_PRESSURE_PLATE,
+      PressurePlateVariant.GREED_PLATE,
+      112,
+    );
   }
 }
