@@ -85,20 +85,16 @@ function reseed(stage: number, stageType: number, level: Level) {
   const stage123StageTypes = [0, 1, 2, 4, 5];
   const stage5StageTypes = [0, 4];
 
-  let newStageType;
+  let newStageType = 0;
 
   if (config.altPathOnly) {
-    if (stage === 4) {
-      newStageType = 4;
-    } else {
-      newStageType = math.random(4, 5);
-    }
+    newStageType = stage === 4 ? 4 : math.random(4, 5);
   } else if (v.oldStage === 4 && v.oldStageType === 4) {
     newStageType = 0;
   } else if (stage === 4 || stage === 5) {
-    newStageType = stage5StageTypes[math.random(0, 1)];
+    newStageType = stage5StageTypes[math.random(0, 1)] ?? 0;
   } else {
-    newStageType = stage123StageTypes[math.random(0, 4)];
+    newStageType = stage123StageTypes[math.random(0, 4)] ?? 0;
   }
 
   let newStage;
