@@ -39,11 +39,14 @@
         [b]Is Henry here?[/b]
         Yes, i added a very rare wave in Dross with Henry!
 
+	[b]The mod broke/X made the game crash :([/b]
+        Do you have the slightest idea how little that narrows it down ? Please give me a precise way to how to reproduce the bug and keep in mind that the cause is often an other mod. So do some tests before please :)
+
         Thanks to Microsorex for letting me use his original code.
 
         If there's some bugs or if you find some waves too easy or too hard, you can contact me on Discord (Gamonymous#1546)
     </description>
-    <version>1.14</version>
+    <version>1.15</version>
     <visibility>Public</visibility>
     <tag id="Rooms"/>
     <tag id="Floors"/>
