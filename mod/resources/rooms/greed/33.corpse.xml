@@ -3102,7 +3102,7 @@
 			<entity type="49" variant="1" subtype="0" weight="1.0"/>
 		</spawn>
 	</room>
-	<room variant="16" name="boss med" type="5" subtype="0" shape="4" width="13" height="14" difficulty="10" weight="1.0">
+	<room variant="16" name="boss hard" type="5" subtype="0" shape="4" width="13" height="14" difficulty="10" weight="1.0">
 		<door exists="True" x="-1" y="3"/>
 		<door exists="True" x="-1" y="10"/>
 		<door exists="True" x="6" y="-1"/>
@@ -3113,7 +3113,7 @@
 			<entity type="911" variant="0" subtype="0" weight="1.0"/>
 		</spawn>
 	</room>
-	<room variant="17" name="boss med" type="5" subtype="0" shape="4" width="13" height="14" difficulty="10" weight="1.0">
+	<room variant="17" name="boss hard" type="5" subtype="0" shape="4" width="13" height="14" difficulty="10" weight="1.0">
 		<door exists="True" x="-1" y="3"/>
 		<door exists="True" x="-1" y="10"/>
 		<door exists="True" x="6" y="-1"/>
