@@ -272,7 +272,8 @@ function postNewRoom() {
     v.rotgutDefeated &&
     v.corpseDDSpawned
   ) {
-    level.GreedModeWave = 12;
+    level.GreedModeWave =
+      GameDifficulty === Difficulty.DIFFICULTY_GREEDIER ? 12 : 11;
   }
 
   // Respawn the Greed plate in case it was replaced by a trapdoor or a poop spawned by Clog
