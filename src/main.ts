@@ -22,6 +22,7 @@ const v = {
   oldStageType: 0,
   lastFloorReseeded: false,
   rotgutDefeated: false,
+  corpseDDSpawned: false,
 };
 
 export const config = v.persistent.config;
@@ -256,11 +257,22 @@ function postNewRoom() {
     Game().IsGreedMode() &&
     stage === 4 &&
     stageType === 4 &&
-    v.rotgutDefeated
+    v.rotgutDefeated &&
+    !v.corpseDDSpawned
   ) {
     level.GreedModeWave += 1;
     room.TrySpawnDevilRoomDoor(true, true);
-    v.rotgutDefeated = false;
+    v.corpseDDSpawned = true;
+  }
+
+  if (
+    Game().IsGreedMode() &&
+    stage === 4 &&
+    stageType === 4 &&
+    v.rotgutDefeated &&
+    v.corpseDDSpawned
+  ) {
+    level.GreedModeWave = 12;
   }
 
   // Respawn the Greed plate in case it was replaced by a trapdoor or a poop spawned by Clog
