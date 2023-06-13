@@ -4170,7 +4170,7 @@
 		<door exists="True" x="13" y="3"/>
 		<door exists="True" x="13" y="10"/>
 		<spawn x="6" y="3">
-			<entity type="906" variant="0" subtype="0" weight="1.0"/>
+			<entity type="48" variant="1" subtype="0" weight="1.0"/>
 		</spawn>
 	</room>
 	<room variant="2" name="boss" type="5" subtype="0" shape="4" width="13" height="14" difficulty="1" weight="1.0">

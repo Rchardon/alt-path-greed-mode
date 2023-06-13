@@ -21,6 +21,7 @@ const v = {
   oldStage: 0,
   oldStageType: 0,
   lastFloorReseeded: false,
+  rotgutDefeated: false,
 };
 
 export const config = v.persistent.config;
@@ -39,6 +40,7 @@ export function main(): void {
   mod.AddCallback(ModCallbacks.MC_POST_NEW_LEVEL, postNewLevel);
   mod.AddCallback(ModCallbacks.MC_POST_NPC_INIT, postNPCInit);
   mod.AddCallback(ModCallbacks.MC_POST_NEW_ROOM, postNewRoom);
+  mod.AddCallback(ModCallbacks.MC_POST_NPC_DEATH, postNPCDeath);
 
   // Print an initialization message to the "log.txt" file
   Isaac.DebugString(`${MOD_NAME} initialized.`);
@@ -239,11 +241,27 @@ function postNewRoom() {
   const level = Game().GetLevel();
   const IsGreedMode = Game().IsGreedMode();
   const stage = level.GetStage();
+  const stageType = level.GetStageType();
   const room = Game().GetRoom();
   const roomType = room.GetType();
   const numGreedWave = level.GreedModeWave;
   const GameDifficulty = Game().Difficulty;
   const roomVariant = getRoomVariant();
+
+  if (room.GetType() === 16 && (roomVariant === 1010 || roomVariant === 1020)) {
+    level.GreedModeWave += 1;
+  }
+
+  if (
+    Game().IsGreedMode() &&
+    stage === 4 &&
+    stageType === 4 &&
+    v.rotgutDefeated
+  ) {
+    level.GreedModeWave += 1;
+    room.TrySpawnDevilRoomDoor(true, true);
+    v.rotgutDefeated = false;
+  }
 
   // Respawn the Greed plate in case it was replaced by a trapdoor or a poop spawned by Clog
   if (
@@ -269,5 +287,22 @@ function postNewRoom() {
       PressurePlateVariant.GREED_PLATE,
       GREED_PLATE_GRID_INDEX,
     );
+  }
+}
+
+function postNPCDeath(npc: EntityNPC) {
+  const level = Game().GetLevel();
+  const stage = level.GetStage();
+  const stageType = level.GetStageType();
+
+  // Rotgut
+  if (
+    Game().IsGreedMode() &&
+    stage === 4 &&
+    stageType === 4 &&
+    npc.Type === EntityType.ENTITY_ROTGUT &&
+    npc.Variant === 2
+  ) {
+    v.rotgutDefeated = true;
   }
 }

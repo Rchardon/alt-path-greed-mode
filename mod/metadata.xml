@@ -9,6 +9,9 @@
         So I added the missing boss waves and 120 different waves for Gehenna and Corpse!
         I tried to copy the style of the other waves that are currently in the game.
         Downpour, Dross, Mines, Ashpit and Mausoleum enemy waves are the original waves currently in the game, i haven't touched them.
+        As a bonus I added red wormwood in Corpse like in Antibirth.
+
+        Update : Rotgut is finally in the mod !
 
         Alt path floors will appear one floor later than their original stage ID in greed mode, with a full alt path run you can have something like that :
         Basement - Downpour - Mines - Mausoleum - Corpse - Shop
@@ -27,26 +30,23 @@
         [b]Clog spawned a poop on the greed button, i cannot launch last wave![/b]
         You'll have to exit and re-enter the room, the greed plate will reappear.
 
-        [b]Where Rotgut?[/b]
-        Rotgut makes the game crash when you enter phase 2. It is replaced by 2 red Wormwoods (yes, the one from Antibirth. Files are currently in the game so i used them)
-
         [b]I typed &quot;stage 1c&quot; in the console but i'm not in Downpour.[/b]
         I use the &quot;reseed&quot; command once per floor, so you'll have to type your stage command twice, sorry about that.
 
         [b]Do you plan to add Cathedral ?[/b]
-        I want to! But it might not be possible since there's no file for it nor is coded in the game.
+        No. Someone did it, you can find it [url=https://steamcommunity.com/sharedfiles/filedetails/?id=2813909722]here[/url] but it's not compatible with my mod.
 
         [b]Is Henry here?[/b]
         Yes, i added a very rare wave in Dross with Henry!
 
-	[b]The mod broke/X made the game crash :([/b]
+        [b]The mod broke/X made the game crash :([/b]
         Do you have the slightest idea how little that narrows it down ? Please give me a precise way to how to reproduce the bug and keep in mind that the cause is often an other mod. So do some tests before please :)
 
         Thanks to Microsorex for letting me use his original code.
 
-        If there's some bugs or if you find some waves too easy or too hard, you can contact me on Discord (Gamonymous#1546)
+        If there's some bugs or if you find some waves too easy or too hard, you can contact me on Discord (@Gamonymous)
     </description>
-    <version>1.15</version>
+    <version>1.16</version>
     <visibility>Public</visibility>
     <tag id="Rooms"/>
     <tag id="Floors"/>
