@@ -3,10 +3,10 @@ import {
   EntityType,
   GridEntityType,
   LevelStage,
-  ModCallback,
   PinVariant,
   PressurePlateVariant,
   RoomType,
+  RotgutVariant,
   StageType,
 } from "isaac-typescript-definitions";
 import {
@@ -15,6 +15,8 @@ import {
   getGridEntities,
   getRoomVariant,
   isGreedMode,
+  onStage,
+  onStageType,
   removeGridEntity,
   spawnGridEntityWithVariant,
 } from "isaacscript-common";
@@ -38,11 +40,6 @@ export function main(): void {
   initModConfigMenu();
   mod.saveDataManager("main", v);
 
-  // Vanilla callbacks
-  mod.AddCallback(ModCallback.POST_NPC_INIT, postNPCInit); // 27
-  mod.AddCallback(ModCallback.POST_NPC_DEATH, postNPCDeath); // 29
-
-  // Custom callbacks
   mod.AddCallbackCustom(
     ModCallbackCustom.POST_NEW_LEVEL_REORDERED,
     postNewLevelReordered,
@@ -51,54 +48,18 @@ export function main(): void {
     ModCallbackCustom.POST_NEW_ROOM_REORDERED,
     postNewRoomReordered,
   );
-}
-
-// ModCallback.POST_NPC_INIT (27)
-function postNPCInit(npc: EntityNPC) {
-  if (!isGreedMode()) {
-    return;
-  }
-
-  const level = game.GetLevel();
-  const stage = level.GetStage();
-
-  if (npc.Type !== EntityType.PIN) {
-    return;
-  }
-
-  // Wormwood
-  if (
-    stage === LevelStage.WOMB_GREED_MODE &&
-    npc.Type === EntityType.PIN &&
-    npc.Variant === PinVariant.WORMWOOD
-  ) {
-    const sprite = npc.GetSprite();
-    sprite.Load("gfx/wormwood_corpse.anm2", false);
-    sprite.ReplaceSpritesheet(0, "gfx/bosses/repentance/wormwood_corpse.png");
-    sprite.LoadGraphics();
-    sprite.Update();
-  }
-}
-
-// ModCallback.POST_NPC_DEATH (29)
-function postNPCDeath(npc: EntityNPC) {
-  if (!isGreedMode()) {
-    return;
-  }
-
-  const level = game.GetLevel();
-  const stage = level.GetStage();
-  const stageType = level.GetStageType();
-
-  // Rotgut
-  if (
-    stage === LevelStage.WOMB_GREED_MODE &&
-    stageType === StageType.REPENTANCE &&
-    npc.Type === EntityType.ROTGUT &&
-    npc.Variant === 2
-  ) {
-    v.run.rotgutDefeated = true;
-  }
+  mod.AddCallbackCustom(
+    ModCallbackCustom.POST_NPC_DEATH_FILTER,
+    postNPCDeathRotGutPhase3,
+    EntityType.ROTGUT,
+    RotgutVariant.PHASE_3_HEART,
+  );
+  mod.AddCallbackCustom(
+    ModCallbackCustom.POST_NPC_INIT_FILTER,
+    postNPCInitWormwood,
+    EntityType.PIN,
+    PinVariant.WORMWOOD,
+  );
 }
 
 // ModCallbackCustom.POST_NEW_LEVEL_REORDERED
@@ -265,5 +226,38 @@ function postNewRoomReordered() {
       PressurePlateVariant.GREED_PLATE,
       GREED_PLATE_GRID_INDEX,
     );
+  }
+}
+
+// ModCallbackCustom.POST_NPC_DEATH_FILTER
+// EntityType.ROTGUT (911)
+// RotgutVariant.PHASE_3_HEART (2)
+function postNPCDeathRotGutPhase3() {
+  if (!isGreedMode()) {
+    return;
+  }
+
+  if (
+    onStage(LevelStage.WOMB_GREED_MODE) &&
+    onStageType(StageType.REPENTANCE)
+  ) {
+    v.run.rotgutDefeated = true;
+  }
+}
+
+// ModCallbackFilter.POST_NPC_INIT_FILTER
+// EntityType.PIN (62)
+// PinVariant.WORMWOOD (3)
+function postNPCInitWormwood(npc: EntityNPC) {
+  if (!isGreedMode()) {
+    return;
+  }
+
+  if (onStage(LevelStage.WOMB_GREED_MODE)) {
+    const sprite = npc.GetSprite();
+    sprite.Load("gfx/wormwood_corpse.anm2", false);
+    sprite.ReplaceSpritesheet(0, "gfx/bosses/repentance/wormwood_corpse.png");
+    sprite.LoadGraphics();
+    sprite.Update();
   }
 }
