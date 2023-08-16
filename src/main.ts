@@ -4,12 +4,14 @@ import {
   GridEntityType,
   LevelStage,
   ModCallback,
+  PinVariant,
   PressurePlateVariant,
   RoomType,
   StageType,
 } from "isaac-typescript-definitions";
 import {
   ModCallbackCustom,
+  game,
   getGridEntities,
   getRoomVariant,
   isGreedMode,
@@ -57,7 +59,7 @@ function postNPCInit(npc: EntityNPC) {
     return;
   }
 
-  const level = Game().GetLevel();
+  const level = game.GetLevel();
   const stage = level.GetStage();
 
   if (npc.Type !== EntityType.PIN) {
@@ -65,7 +67,11 @@ function postNPCInit(npc: EntityNPC) {
   }
 
   // Wormwood
-  if (stage === 4 && npc.Type === EntityType.PIN && npc.Variant === 3) {
+  if (
+    stage === LevelStage.WOMB_GREED_MODE &&
+    npc.Type === EntityType.PIN &&
+    npc.Variant === PinVariant.WORMWOOD
+  ) {
     const sprite = npc.GetSprite();
     sprite.Load("gfx/wormwood_corpse.anm2", false);
     sprite.ReplaceSpritesheet(0, "gfx/bosses/repentance/wormwood_corpse.png");
@@ -80,13 +86,13 @@ function postNPCDeath(npc: EntityNPC) {
     return;
   }
 
-  const level = Game().GetLevel();
+  const level = game.GetLevel();
   const stage = level.GetStage();
   const stageType = level.GetStageType();
 
   // Rotgut
   if (
-    stage === 4 &&
+    stage === LevelStage.WOMB_GREED_MODE &&
     stageType === StageType.REPENTANCE &&
     npc.Type === EntityType.ROTGUT &&
     npc.Variant === 2
@@ -101,13 +107,15 @@ function postNewLevelReordered() {
     return;
   }
 
-  const level = Game().GetLevel();
+  const level = game.GetLevel();
   const stage = level.GetStage();
   const stageType = level.GetStageType();
 
   if (
     stage === LevelStage.BASEMENT_GREED_MODE &&
-    (stageType === 0 || stageType === 1 || stageType === 2)
+    (stageType === StageType.ORIGINAL ||
+      stageType === StageType.WRATH_OF_THE_LAMB ||
+      stageType === StageType.AFTERBIRTH)
   ) {
     v.run.oldStage = stage;
     v.run.oldStageType = stageType;
@@ -181,7 +189,7 @@ function reseed(stage: number, stageType: number, level: Level) {
 }
 
 function getEffectiveGreedModeStage(): number {
-  const level = Game().GetLevel();
+  const level = game.GetLevel();
   const stage = level.GetStage();
   const stageType = level.GetStageType();
 
@@ -198,13 +206,12 @@ function postNewRoomReordered() {
     return;
   }
 
-  const level = Game().GetLevel();
+  const level = game.GetLevel();
   const stage = level.GetStage();
   const stageType = level.GetStageType();
-  const room = Game().GetRoom();
+  const room = game.GetRoom();
   const roomType = room.GetType();
   const numGreedWave = level.GreedModeWave;
-  const GameDifficulty = Game().Difficulty;
   const roomVariant = getRoomVariant();
 
   if (
@@ -231,7 +238,7 @@ function postNewRoomReordered() {
     v.run.rotgutDefeated &&
     v.run.corpseDDSpawned
   ) {
-    level.GreedModeWave = GameDifficulty === Difficulty.GREEDIER ? 12 : 11;
+    level.GreedModeWave = game.Difficulty === Difficulty.GREEDIER ? 12 : 11;
   }
 
   // Respawn the Greed plate in case it was replaced by a trapdoor or a poop spawned by Clog.
@@ -241,10 +248,10 @@ function postNewRoomReordered() {
     roomVariant > 999 &&
     ((numGreedWave <= 11 &&
       numGreedWave >= 10 &&
-      GameDifficulty === Difficulty.GREEDIER) ||
+      game.Difficulty === Difficulty.GREEDIER) ||
       (numGreedWave <= 10 &&
         numGreedWave >= 9 &&
-        GameDifficulty === Difficulty.GREED))
+        game.Difficulty === Difficulty.GREED))
   ) {
     const gridPoops = getGridEntities(GridEntityType.POOP);
     for (const gridPoop of gridPoops) {
