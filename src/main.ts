@@ -14,7 +14,6 @@ import {
   getRoomVariant,
   isGreedMode,
   removeGridEntity,
-  setAllArrayElements,
   spawnGridEntityWithVariant,
 } from "isaacscript-common";
 import { mod } from "./mod";
@@ -22,20 +21,26 @@ import { config, initModConfigMenu } from "./modConfigMenu";
 
 const GREED_PLATE_GRID_INDEX = 112;
 
-const floorReseeded = [false, false, false, false];
-let oldStage = 0;
-let oldStageType = 0;
-let lastFloorReseeded = false;
-let rotgutDefeated = false;
-let corpseDDSpawned = false;
+const v = {
+  run: {
+    floorReseeded: [false, false, false, false],
+    oldStage: 0,
+    oldStageType: 0,
+    lastFloorReseeded: false,
+    rotgutDefeated: false,
+    corpseDDSpawned: false,
+  },
+};
 
 export function main(): void {
   initModConfigMenu();
+  mod.saveDataManager("main", v);
 
-  mod.AddCallback(ModCallback.POST_PLAYER_INIT, postPlayerInit); // 9
+  // Vanilla callbacks
   mod.AddCallback(ModCallback.POST_NPC_INIT, postNPCInit); // 27
   mod.AddCallback(ModCallback.POST_NPC_DEATH, postNPCDeath); // 29
 
+  // Custom callbacks
   mod.AddCallbackCustom(
     ModCallbackCustom.POST_NEW_LEVEL_REORDERED,
     postNewLevelReordered,
@@ -44,15 +49,6 @@ export function main(): void {
     ModCallbackCustom.POST_NEW_ROOM_REORDERED,
     postNewRoomReordered,
   );
-}
-
-// ModCallback.POST_PLAYER_INIT (9)
-function postPlayerInit() {
-  if (!isGreedMode()) {
-    return;
-  }
-
-  setAllArrayElements(floorReseeded, false);
 }
 
 // ModCallback.POST_NPC_INIT (27)
@@ -95,7 +91,7 @@ function postNPCDeath(npc: EntityNPC) {
     npc.Type === EntityType.ROTGUT &&
     npc.Variant === 2
   ) {
-    rotgutDefeated = true;
+    v.run.rotgutDefeated = true;
   }
 }
 
@@ -113,22 +109,22 @@ function postNewLevelReordered() {
     stage === LevelStage.BASEMENT_GREED_MODE &&
     (stageType === 0 || stageType === 1 || stageType === 2)
   ) {
-    oldStage = stage;
-    oldStageType = stageType;
+    v.run.oldStage = stage;
+    v.run.oldStageType = stageType;
   } else if (
     (stage !== 1 &&
       stage <= 5 &&
       stageType !== 4 &&
       stageType !== 5 &&
-      !floorReseeded[getEffectiveGreedModeStage() - 2] &&
-      !lastFloorReseeded) ||
-    (oldStage === stage - 1 &&
-      (oldStageType === 4 || oldStageType === 5) &&
-      floorReseeded[getEffectiveGreedModeStage() - 2])
+      !v.run.floorReseeded[getEffectiveGreedModeStage() - 2] &&
+      !v.run.lastFloorReseeded) ||
+    (v.run.oldStage === stage - 1 &&
+      (v.run.oldStageType === 4 || v.run.oldStageType === 5) &&
+      v.run.floorReseeded[getEffectiveGreedModeStage() - 2])
   ) {
     reseed(stage, stageType, level);
   } else {
-    lastFloorReseeded = false;
+    v.run.lastFloorReseeded = false;
   }
 }
 
@@ -140,7 +136,7 @@ function reseed(stage: number, stageType: number, level: Level) {
 
   if (config.altPathOnly) {
     newStageType = stage === 4 ? 4 : math.random(4, 5);
-  } else if (oldStage === 4 && oldStageType === 4) {
+  } else if (v.run.oldStage === 4 && v.run.oldStageType === 4) {
     newStageType = 0;
   } else if (stage === 4 || stage === 5) {
     newStageType = stage5StageTypes[math.random(0, 1)] ?? 0;
@@ -150,34 +146,37 @@ function reseed(stage: number, stageType: number, level: Level) {
 
   let newStage: int;
 
-  if (oldStage === 4 && oldStageType === 4) {
+  if (v.run.oldStage === 4 && v.run.oldStageType === 4) {
     newStage = 6;
   } else if (
     (newStageType === 4 || newStageType === 5) &&
-    (oldStageType === 0 || oldStageType === 1 || oldStageType === 2)
+    (v.run.oldStageType === 0 ||
+      v.run.oldStageType === 1 ||
+      v.run.oldStageType === 2)
   ) {
-    newStage = oldStage;
+    newStage = v.run.oldStage;
   } else if (
-    (oldStageType === 4 || oldStageType === 5) &&
+    (v.run.oldStageType === 4 || v.run.oldStageType === 5) &&
     (newStageType === 0 || newStageType === 1 || newStageType === 2)
   ) {
-    newStage = oldStage + 2;
+    newStage = v.run.oldStage + 2;
   } else if (
-    stage === oldStage &&
-    stageType === oldStageType &&
-    !floorReseeded[getEffectiveGreedModeStage() - 2]
+    stage === v.run.oldStage &&
+    stageType === v.run.oldStageType &&
+    !v.run.floorReseeded[getEffectiveGreedModeStage() - 2]
   ) {
     newStage = newStageType === 4 || newStageType === 5 ? stage - 1 : stage;
   } else {
-    newStage = oldStage + 1;
+    newStage = v.run.oldStage + 1;
   }
 
-  floorReseeded[getEffectiveGreedModeStage() - 2] = true;
-  lastFloorReseeded = true;
+  v.run.floorReseeded[getEffectiveGreedModeStage() - 2] = true;
+  v.run.lastFloorReseeded = true;
 
   level.SetStage(newStage, newStageType);
-  oldStage = newStage;
-  oldStageType = newStageType;
+  v.run.oldStage = newStage;
+  v.run.oldStageType = newStageType;
+
   Isaac.ExecuteCommand("reseed");
 }
 
@@ -215,17 +214,22 @@ function postNewRoomReordered() {
     level.GreedModeWave++;
   }
 
-  if (stage === 4 && stageType === 4 && rotgutDefeated && !corpseDDSpawned) {
+  if (
+    stage === 4 &&
+    stageType === 4 &&
+    v.run.rotgutDefeated &&
+    !v.run.corpseDDSpawned
+  ) {
     level.GreedModeWave++;
     room.TrySpawnDevilRoomDoor(true, true);
-    corpseDDSpawned = true;
+    v.run.corpseDDSpawned = true;
   }
 
   if (
     stage === 4 &&
     stageType === StageType.REPENTANCE &&
-    rotgutDefeated &&
-    corpseDDSpawned
+    v.run.rotgutDefeated &&
+    v.run.corpseDDSpawned
   ) {
     level.GreedModeWave = GameDifficulty === Difficulty.GREEDIER ? 12 : 11;
   }
@@ -248,6 +252,7 @@ function postNewRoomReordered() {
         removeGridEntity(gridPoop, true);
       }
     }
+
     spawnGridEntityWithVariant(
       GridEntityType.PRESSURE_PLATE,
       PressurePlateVariant.GREED_PLATE,
