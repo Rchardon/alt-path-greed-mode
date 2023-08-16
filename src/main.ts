@@ -110,10 +110,7 @@ function reseed(stage: LevelStage, stageType: StageType, level: Level) {
   let newStageType = StageType.ORIGINAL;
 
   if (config.altPathOnly) {
-    newStageType =
-      stage === LevelStage.WOMB_GREED_MODE
-        ? LevelStage.WOMB_GREED_MODE
-        : math.random(4, 5);
+    newStageType = stage === LevelStage.WOMB_GREED_MODE ? 4 : math.random(4, 5);
   } else if (
     v.run.oldStage === LevelStage.WOMB_GREED_MODE &&
     v.run.oldStageType === StageType.REPENTANCE
