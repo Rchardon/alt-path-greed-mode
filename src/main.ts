@@ -13,12 +13,14 @@ import {
   ModCallbackCustom,
   game,
   getGridEntities,
+  getRandomArrayElement,
   getRoomVariant,
   getStage,
   isGreedMode,
   isRepentanceStage,
   onRepentanceStage,
   onStage,
+  onStageOrHigher,
   onStageType,
   removeGridEntity,
   spawnGridEntityWithVariant,
@@ -75,94 +77,122 @@ function postNewLevelReordered() {
   const stage = level.GetStage();
   const stageType = level.GetStageType();
   const effectiveGreedModeStage = getEffectiveGreedModeStage();
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
+  const onIncreasedStage = stage === v.run.oldStage + 1;
 
-  if (
-    stage === LevelStage.BASEMENT_GREED_MODE &&
-    (stageType === StageType.ORIGINAL ||
-      stageType === StageType.WRATH_OF_THE_LAMB ||
-      stageType === StageType.AFTERBIRTH)
-  ) {
+  if (onStage(LevelStage.BASEMENT_GREED_MODE) && !onRepentanceStage()) {
     v.run.oldStage = stage;
     v.run.oldStageType = stageType;
   } else if (
-    (stage !== LevelStage.BASEMENT_GREED_MODE &&
-      stage <= LevelStage.SHEOL_GREED_MODE &&
+    (stage > LevelStage.BASEMENT_GREED_MODE &&
+      stage < LevelStage.SHOP_GREED_MODE &&
       !isRepentanceStage(stageType) &&
       !v.run.floorsReseeded.has(effectiveGreedModeStage) &&
       !v.run.lastFloorReseeded) ||
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
-    (v.run.oldStage === stage - 1 &&
+    (onIncreasedStage &&
       isRepentanceStage(v.run.oldStageType) &&
       v.run.floorsReseeded.has(effectiveGreedModeStage))
   ) {
-    reseed(stage, stageType, level);
+    reseed();
   } else {
     v.run.lastFloorReseeded = false;
   }
 }
 
-function reseed(stage: LevelStage, stageType: StageType, level: Level) {
-  const stage123StageTypes = [0, 1, 2, 4, 5];
-  const stage5StageTypes = [0, 4];
-
+function reseed() {
+  const level = game.GetLevel();
   const effectiveGreedModeStage = getEffectiveGreedModeStage();
 
-  let newStageType = StageType.ORIGINAL;
+  const newStageType = getStageTypeForReseed();
+  const newStage = getStageForReseed(newStageType);
 
-  if (config.altPathOnly) {
-    newStageType = stage === LevelStage.WOMB_GREED_MODE ? 4 : math.random(4, 5);
-  } else if (
-    v.run.oldStage === LevelStage.WOMB_GREED_MODE &&
-    v.run.oldStageType === StageType.REPENTANCE
-  ) {
-    newStageType = 0;
-  } else if (
-    stage === LevelStage.WOMB_GREED_MODE ||
-    stage === LevelStage.SHEOL_GREED_MODE
-  ) {
-    newStageType = stage5StageTypes[math.random(0, 1)] ?? 0;
-  } else {
-    newStageType = stage123StageTypes[math.random(0, 4)] ?? 0;
-  }
+  v.run.floorsReseeded.add(effectiveGreedModeStage);
+  v.run.oldStage = newStage;
+  v.run.oldStageType = newStageType;
+  v.run.lastFloorReseeded = true;
 
-  let newStage: LevelStage;
+  level.SetStage(newStage, newStageType);
+  Isaac.ExecuteCommand("reseed");
+}
 
+function getStageTypeForReseed(): StageType {
+  // Corpse --> The Shop (this if statement might be unnecessary)
   if (
     v.run.oldStage === LevelStage.WOMB_GREED_MODE &&
     v.run.oldStageType === StageType.REPENTANCE
   ) {
-    newStage = LevelStage.SHOP_GREED_MODE;
-  } else if (
-    (newStageType === StageType.REPENTANCE ||
-      newStageType === StageType.REPENTANCE_B) &&
-    (v.run.oldStageType === StageType.ORIGINAL ||
-      v.run.oldStageType === StageType.WRATH_OF_THE_LAMB ||
-      v.run.oldStageType === StageType.AFTERBIRTH)
-  ) {
-    newStage = v.run.oldStage;
-  } else if (
-    (v.run.oldStageType === 4 || v.run.oldStageType === 5) &&
-    (newStageType === 0 || newStageType === 1 || newStageType === 2)
-  ) {
-    newStage = v.run.oldStage + 2;
-  } else if (
-    stage === v.run.oldStage &&
-    stageType === v.run.oldStageType &&
-    !v.run.floorsReseeded.has(effectiveGreedModeStage)
-  ) {
-    newStage = newStageType === 4 || newStageType === 5 ? stage - 1 : stage;
-  } else {
-    newStage = v.run.oldStage + 1;
+    return StageType.ORIGINAL;
   }
 
-  v.run.floorsReseeded.add(effectiveGreedModeStage);
-  v.run.lastFloorReseeded = true;
+  // Sheol and later floors do not have any alt floors.
+  if (onStageOrHigher(LevelStage.SHEOL_GREED_MODE)) {
+    return StageType.ORIGINAL;
+  }
 
-  level.SetStage(newStage, newStageType);
-  v.run.oldStage = newStage;
-  v.run.oldStageType = newStageType;
+  // First, handle the case where there should always be an alt path.
+  if (config.altPathOnly) {
+    // Womb only has one Repentance alt floor, Corpse (because Mortis was never implemented).
+    return onStage(LevelStage.WOMB_GREED_MODE)
+      ? StageType.REPENTANCE
+      : getRandomArrayElement([StageType.REPENTANCE, StageType.REPENTANCE_B]);
+  }
 
-  Isaac.ExecuteCommand("reseed");
+  // Womb only has one Repentance alt floor, Corpse (because Mortis was never implemented).
+  if (onStage(LevelStage.WOMB_GREED_MODE)) {
+    return getRandomArrayElement([
+      StageType.ORIGINAL,
+      StageType.WRATH_OF_THE_LAMB,
+      StageType.AFTERBIRTH,
+      StageType.REPENTANCE,
+    ]);
+  }
+
+  return getRandomArrayElement([
+    StageType.ORIGINAL,
+    StageType.WRATH_OF_THE_LAMB,
+    StageType.AFTERBIRTH,
+    StageType.REPENTANCE,
+    StageType.REPENTANCE_B,
+  ]);
+}
+
+function getStageForReseed(newStageType: StageType): LevelStage {
+  const effectiveGreedModeStage = getEffectiveGreedModeStage();
+
+  // Corpse --> The Shop
+  if (
+    v.run.oldStage === LevelStage.WOMB_GREED_MODE &&
+    v.run.oldStageType === StageType.REPENTANCE
+  ) {
+    return LevelStage.SHOP_GREED_MODE;
+  }
+
+  // e.g. Basement --> Downpour
+  if (
+    isRepentanceStage(newStageType) &&
+    !isRepentanceStage(v.run.oldStageType)
+  ) {
+    return v.run.oldStage;
+  }
+
+  // e.g. Downpour --> Depths
+  if (
+    isRepentanceStage(v.run.oldStageType) &&
+    !isRepentanceStage(newStageType)
+  ) {
+    return v.run.oldStage + 2;
+  }
+
+  if (
+    onStage(v.run.oldStage) &&
+    onStageType(v.run.oldStageType) &&
+    !v.run.floorsReseeded.has(effectiveGreedModeStage)
+  ) {
+    const stage = getStage();
+    return isRepentanceStage(newStageType) ? stage - 1 : stage;
+  }
+
+  return v.run.oldStage + 1;
 }
 
 function getEffectiveGreedModeStage(): LevelStage {

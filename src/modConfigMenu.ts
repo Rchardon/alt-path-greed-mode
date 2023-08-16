@@ -1,6 +1,6 @@
 import type { TupleWithMaxLength } from "isaacscript-common";
+import { Config } from "./classes/Config";
 import { mod } from "./mod";
-import { Config } from "./types/Config";
 
 /** From Racing+. */
 type ConfigDescription = readonly [
