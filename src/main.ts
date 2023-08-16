@@ -12,11 +12,12 @@ import {
   ModCallbackCustom,
   getGridEntities,
   getRoomVariant,
+  isGreedMode,
   removeGridEntity,
   spawnGridEntityWithVariant,
 } from "isaacscript-common";
 import { mod } from "./mod";
-import { initModConfigMenu } from "./modConfigMenu";
+import { config, initModConfigMenu } from "./modConfigMenu";
 
 const GREED_PLATE_GRID_INDEX = 112;
 
@@ -48,7 +49,7 @@ function postPlayerInit() {
 }
 
 function postNewLevel() {
-  if (Game().IsGreedMode()) {
+  if (isGreedMode()) {
     const level = Game().GetLevel();
     const stage = level.GetStage();
     const stageType = level.GetStageType();
@@ -72,7 +73,7 @@ function postNewLevel() {
     ) {
       reseed(stage, stageType, level);
     } else {
-      v.lastFloorReseeded = false;
+      lastFloorReseeded = false;
     }
   }
 }
@@ -85,7 +86,7 @@ function reseed(stage: number, stageType: number, level: Level) {
 
   if (config.altPathOnly) {
     newStageType = stage === 4 ? 4 : math.random(4, 5);
-  } else if (v.oldStage === 4 && v.oldStageType === 4) {
+  } else if (oldStage === 4 && oldStageType === 4) {
     newStageType = 0;
   } else if (stage === 4 || stage === 5) {
     newStageType = stage5StageTypes[math.random(0, 1)] ?? 0;
@@ -95,34 +96,34 @@ function reseed(stage: number, stageType: number, level: Level) {
 
   let newStage: int;
 
-  if (v.oldStage === 4 && v.oldStageType === 4) {
+  if (oldStage === 4 && oldStageType === 4) {
     newStage = 6;
   } else if (
     (newStageType === 4 || newStageType === 5) &&
-    (v.oldStageType === 0 || v.oldStageType === 1 || v.oldStageType === 2)
+    (oldStageType === 0 || oldStageType === 1 || oldStageType === 2)
   ) {
-    newStage = v.oldStage;
+    newStage = oldStage;
   } else if (
-    (v.oldStageType === 4 || v.oldStageType === 5) &&
+    (oldStageType === 4 || oldStageType === 5) &&
     (newStageType === 0 || newStageType === 1 || newStageType === 2)
   ) {
-    newStage = v.oldStage + 2;
+    newStage = oldStage + 2;
   } else if (
-    stage === v.oldStage &&
-    stageType === v.oldStageType &&
-    !v.floorReseeded[getEffectiveGreedModeStage() - 2]
+    stage === oldStage &&
+    stageType === oldStageType &&
+    !floorReseeded[getEffectiveGreedModeStage() - 2]
   ) {
     newStage = newStageType === 4 || newStageType === 5 ? stage - 1 : stage;
   } else {
-    newStage = v.oldStage + 1;
+    newStage = oldStage + 1;
   }
 
-  v.floorReseeded[getEffectiveGreedModeStage() - 2] = true;
-  v.lastFloorReseeded = true;
+  floorReseeded[getEffectiveGreedModeStage() - 2] = true;
+  lastFloorReseeded = true;
 
   level.SetStage(newStage, newStageType);
-  v.oldStage = newStage;
-  v.oldStageType = newStageType;
+  oldStage = newStage;
+  oldStageType = newStageType;
   Isaac.ExecuteCommand("reseed");
 }
 
@@ -136,7 +137,7 @@ function postNPCInit(npc: EntityNPC) {
 
   // Wormwood
   if (
-    Game().IsGreedMode() &&
+    isGreedMode() &&
     stage === 4 &&
     npc.Type === EntityType.PIN &&
     npc.Variant === 3
@@ -163,7 +164,6 @@ function getEffectiveGreedModeStage(): number {
 
 function postNewRoom() {
   const level = Game().GetLevel();
-  const IsGreedMode = Game().IsGreedMode();
   const stage = level.GetStage();
   const stageType = level.GetStageType();
   const room = Game().GetRoom();
@@ -180,31 +180,31 @@ function postNewRoom() {
   }
 
   if (
-    Game().IsGreedMode() &&
+    isGreedMode() &&
     stage === 4 &&
     stageType === 4 &&
-    v.rotgutDefeated &&
-    !v.corpseDDSpawned
+    rotgutDefeated &&
+    !corpseDDSpawned
   ) {
     level.GreedModeWave++;
     room.TrySpawnDevilRoomDoor(true, true);
-    v.corpseDDSpawned = true;
+    corpseDDSpawned = true;
   }
 
   if (
-    Game().IsGreedMode() &&
+    isGreedMode() &&
     stage === 4 &&
     stageType === StageType.REPENTANCE &&
-    v.rotgutDefeated &&
-    v.corpseDDSpawned
+    rotgutDefeated &&
+    corpseDDSpawned
   ) {
     level.GreedModeWave = GameDifficulty === Difficulty.GREEDIER ? 12 : 11;
   }
 
   // Respawn the Greed plate in case it was replaced by a trapdoor or a poop spawned by Clog.
   if (
+    isGreedMode() &&
     roomType === RoomType.DEFAULT &&
-    IsGreedMode &&
     stage === LevelStage.BASEMENT_GREED_MODE &&
     roomVariant > 999 &&
     ((numGreedWave <= 11 &&
@@ -235,12 +235,12 @@ function postNPCDeath(npc: EntityNPC) {
 
   // Rotgut
   if (
-    Game().IsGreedMode() &&
+    isGreedMode() &&
     stage === 4 &&
     stageType === StageType.REPENTANCE &&
     npc.Type === EntityType.ROTGUT &&
     npc.Variant === 2
   ) {
-    v.rotgutDefeated = true;
+    rotgutDefeated = true;
   }
 }

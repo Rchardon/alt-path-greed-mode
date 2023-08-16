@@ -37,7 +37,7 @@ const v = {
   },
 };
 
-const { config } = v.persistent;
+export const { config } = v.persistent;
 
 export function initModConfigMenu(): void {
   mod.saveDataManager("modConfigMenu", v);
