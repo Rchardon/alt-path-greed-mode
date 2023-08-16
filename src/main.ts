@@ -116,6 +116,9 @@ function reseed() {
 }
 
 function getStageTypeForReseed(): StageType {
+  const level = game.GetLevel();
+  const seed = level.GetDungeonPlacementSeed();
+
   // Corpse --> The Shop (this if statement might be unnecessary)
   if (
     v.run.oldStage === LevelStage.WOMB_GREED_MODE &&
@@ -134,26 +137,35 @@ function getStageTypeForReseed(): StageType {
     // Womb only has one Repentance alt floor, Corpse (because Mortis was never implemented).
     return onStage(LevelStage.WOMB_GREED_MODE)
       ? StageType.REPENTANCE
-      : getRandomArrayElement([StageType.REPENTANCE, StageType.REPENTANCE_B]);
+      : getRandomArrayElement(
+          [StageType.REPENTANCE, StageType.REPENTANCE_B],
+          seed,
+        );
   }
 
   // Womb only has one Repentance alt floor, Corpse (because Mortis was never implemented).
   if (onStage(LevelStage.WOMB_GREED_MODE)) {
-    return getRandomArrayElement([
+    return getRandomArrayElement(
+      [
+        StageType.ORIGINAL,
+        StageType.WRATH_OF_THE_LAMB,
+        StageType.AFTERBIRTH,
+        StageType.REPENTANCE,
+      ],
+      seed,
+    );
+  }
+
+  return getRandomArrayElement(
+    [
       StageType.ORIGINAL,
       StageType.WRATH_OF_THE_LAMB,
       StageType.AFTERBIRTH,
       StageType.REPENTANCE,
-    ]);
-  }
-
-  return getRandomArrayElement([
-    StageType.ORIGINAL,
-    StageType.WRATH_OF_THE_LAMB,
-    StageType.AFTERBIRTH,
-    StageType.REPENTANCE,
-    StageType.REPENTANCE_B,
-  ]);
+      StageType.REPENTANCE_B,
+    ],
+    seed,
+  );
 }
 
 function getStageForReseed(newStageType: StageType): LevelStage {
