@@ -1,14 +1,4 @@
 import {
-  ISCFeature,
-  ModCallbackCustom,
-  getGridEntities,
-  getRoomVariant,
-  removeGridEntity,
-  spawnGridEntityWithVariant,
-  upgradeMod,
-} from "isaacscript-common";
-import { Config } from "./types/Config";
-import {
   Difficulty,
   EntityType,
   GridEntityType,
@@ -18,6 +8,16 @@ import {
   RoomType,
   StageType,
 } from "isaac-typescript-definitions";
+import {
+  ISCFeature,
+  ModCallbackCustom,
+  getGridEntities,
+  getRoomVariant,
+  removeGridEntity,
+  spawnGridEntityWithVariant,
+  upgradeMod,
+} from "isaacscript-common";
+import { Config } from "./types/Config";
 
 const MOD_NAME = "alt-path-greed-mode";
 const CATEGORY_NAME = "Alt Path Greed Mode";
@@ -182,19 +182,14 @@ function registerSubMenuConfig(
 
     ModConfigMenu.AddSetting(CATEGORY_NAME, subMenuName, {
       Type: optionType,
-      CurrentSetting: () => config[configName as keyof Config],
-      Display: () =>
-        getDisplayTextBoolean(
-          configName as keyof Config,
-          code,
-          shortDescription,
-        ),
+      CurrentSetting: () => config[configName!],
+      Display: () => getDisplayTextBoolean(configName!, code, shortDescription),
       OnChange: (newValue: number | boolean | undefined) => {
         if (newValue === undefined) {
           return;
         }
 
-        config[configName as keyof Config] = newValue as boolean;
+        config[configName!] = newValue as boolean;
         mod.saveDataManagerSave();
       },
       Info: [longDescription],
@@ -237,7 +232,7 @@ const SETTINGS: ConfigDescriptions = [
       "Play on alternate path only instead of the mix of regular and alternate floors",
     ],
   ],
-];
+] as const;
 
 function getEffectiveGreedModeStage(): number {
   const level = Game().GetLevel();
