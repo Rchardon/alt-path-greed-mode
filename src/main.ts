@@ -9,43 +9,26 @@ import {
   StageType,
 } from "isaac-typescript-definitions";
 import {
-  ISCFeature,
   ModCallbackCustom,
   getGridEntities,
   getRoomVariant,
   removeGridEntity,
   spawnGridEntityWithVariant,
-  upgradeMod,
 } from "isaacscript-common";
-import { Config } from "./types/Config";
+import { mod } from "./mod";
+import { initModConfigMenu } from "./modConfigMenu";
 
-const MOD_NAME = "alt-path-greed-mode";
-const CATEGORY_NAME = "Alt Path Greed Mode";
 const GREED_PLATE_GRID_INDEX = 112;
 
-const v = {
-  floorReseeded: [false, false, false, false],
-  persistent: {
-    config: new Config(),
-  },
-  oldStage: 0,
-  oldStageType: 0,
-  lastFloorReseeded: false,
-  rotgutDefeated: false,
-  corpseDDSpawned: false,
-};
-
-export const { config } = v.persistent;
-// Instantiate a new mod object, which grants the ability to add callback functions that correspond
-// to in-game events.
-const modVanilla = RegisterMod(MOD_NAME, 1);
-const features = [ISCFeature.SAVE_DATA_MANAGER] as const;
-const mod = upgradeMod(modVanilla, features);
+const floorReseeded = [false, false, false, false];
+let oldStage = 0;
+let oldStageType = 0;
+let lastFloorReseeded = false;
+let rotgutDefeated = false;
+let corpseDDSpawned = false;
 
 export function main(): void {
-  mod.saveDataManager("modConfigMenu", v);
-
-  registerSubMenuConfig("Settings", SETTINGS);
+  initModConfigMenu();
 
   mod.AddCallback(ModCallback.POST_PLAYER_INIT, postPlayerInit);
   mod.AddCallbackCustom(
@@ -55,16 +38,13 @@ export function main(): void {
   mod.AddCallback(ModCallback.POST_NPC_INIT, postNPCInit);
   mod.AddCallbackCustom(ModCallbackCustom.POST_NEW_ROOM_REORDERED, postNewRoom);
   mod.AddCallback(ModCallback.POST_NPC_DEATH, postNPCDeath);
-
-  // Print an initialization message to the "log.txt" file.
-  Isaac.DebugString(`${MOD_NAME} initialized.`);
 }
 
 function postPlayerInit() {
-  v.floorReseeded[0] = false;
-  v.floorReseeded[1] = false;
-  v.floorReseeded[2] = false;
-  v.floorReseeded[3] = false;
+  floorReseeded[0] = false;
+  floorReseeded[1] = false;
+  floorReseeded[2] = false;
+  floorReseeded[3] = false;
 }
 
 function postNewLevel() {
@@ -77,18 +57,18 @@ function postNewLevel() {
       stage === 1 &&
       (stageType === 0 || stageType === 1 || stageType === 2)
     ) {
-      v.oldStage = stage;
-      v.oldStageType = stageType;
+      oldStage = stage;
+      oldStageType = stageType;
     } else if (
       (stage !== 1 &&
         stage <= 5 &&
         stageType !== 4 &&
         stageType !== 5 &&
-        !v.floorReseeded[getEffectiveGreedModeStage() - 2] &&
-        !v.lastFloorReseeded) ||
-      (v.oldStage === stage - 1 &&
-        (v.oldStageType === 4 || v.oldStageType === 5) &&
-        v.floorReseeded[getEffectiveGreedModeStage() - 2])
+        !floorReseeded[getEffectiveGreedModeStage() - 2] &&
+        !lastFloorReseeded) ||
+      (oldStage === stage - 1 &&
+        (oldStageType === 4 || oldStageType === 5) &&
+        floorReseeded[getEffectiveGreedModeStage() - 2])
     ) {
       reseed(stage, stageType, level);
     } else {
@@ -168,71 +148,6 @@ function postNPCInit(npc: EntityNPC) {
     sprite.Update();
   }
 }
-
-function registerSubMenuConfig(
-  subMenuName: string,
-  descriptions: ConfigDescriptions,
-) {
-  if (ModConfigMenu === undefined) {
-    return;
-  }
-
-  for (const [configName, array] of descriptions) {
-    const [optionType, code, shortDescription, longDescription] = array;
-
-    ModConfigMenu.AddSetting(CATEGORY_NAME, subMenuName, {
-      Type: optionType,
-      CurrentSetting: () => config[configName!],
-      Display: () => getDisplayTextBoolean(configName!, code, shortDescription),
-      OnChange: (newValue: number | boolean | undefined) => {
-        if (newValue === undefined) {
-          return;
-        }
-
-        config[configName!] = newValue as boolean;
-        mod.saveDataManagerSave();
-      },
-      Info: [longDescription],
-    });
-  }
-}
-
-function getDisplayTextBoolean(
-  configName: keyof Config,
-  code: string,
-  shortDescription: string,
-) {
-  switch (code) {
-    case "": {
-      return `${shortDescription}: n/a`;
-    }
-
-    default: {
-      const currentValue = config[configName];
-      return `${code} - ${shortDescription}: ${onOff(currentValue)}`;
-    }
-  }
-}
-
-function onOff(setting: boolean) {
-  return setting ? "ON" : "OFF";
-}
-
-export type ConfigDescriptions = Array<
-  [keyof Config | null, [ModConfigMenuOptionType, string, string, string]]
->;
-
-const SETTINGS: ConfigDescriptions = [
-  [
-    "altPathOnly",
-    [
-      ModConfigMenuOptionType.BOOLEAN,
-      "1",
-      "Play on alt path only",
-      "Play on alternate path only instead of the mix of regular and alternate floors",
-    ],
-  ],
-] as const;
 
 function getEffectiveGreedModeStage(): number {
   const level = Game().GetLevel();
