@@ -6,32 +6,38 @@ set -e # Exit on any errors
 # https://stackoverflow.com/questions/59895/getting-the-source-directory-of-a-bash-script-from-within
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
+# Get the name of the repository:
+# https://stackoverflow.com/questions/23162299/how-to-get-the-last-part-of-dirname-in-bash/23162553
+REPO_NAME="$(basename "$DIR")"
+
 SECONDS=0
 
 cd "$DIR"
 
-# Step 1 - Use Prettier to check formatting
-npx prettier --check "src/**/*.ts"
+# Use Prettier to check formatting.
+# "--log-level=warn" makes it only output errors.
+npx prettier --log-level=warn --check .
 
-# Step 2 - Use ESLint to lint the TypeScript
-# Since all ESLint errors are set to warnings,
-# we set max warnings to 0 so that warnings will fail in CI
-npx eslint --max-warnings 0 src
+# Use ESLint to lint the TypeScript.
+# "--max-warnings 0" makes warnings fail in CI, since we set all ESLint errors to warnings.
+npx eslint --max-warnings 0 .
 
-# Step 3 - Spell check every file using cspell
-# We use no-progress and no-summary because we want to only output errors
-npx cspell --no-progress --no-summary "src/**/*.ts"
-npx cspell --no-progress --no-summary "mod/metadata.xml"
+# Check for unused exports.
+# "--error" makes it return an error code of 1 if unused exports are found.
+npx ts-prune --error
 
-# Step 4 - Check for incorrectly formatted XML files
-# (and skip this step if xmllint is not currently installed for whatever reason)
-if ! command -v xmllint &> /dev/null; then
-  find "$DIR/mod" -name "*.xml" -print0 | xargs -0 xmllint --noout
+# Use `isaac-xml-validator` to validate XML files.
+# (Skip this step if Python is not currently installed for whatever reason.)
+if command -v python &> /dev/null; then
+  pip install isaac-xml-validator --upgrade --quiet
+  isaac-xml-validator --quiet
 fi
 
-# Step 4 - Check for unused imports
-# The "--error" flag makes it return an error code of 1 if unused exports are found
-# (this starts out disabled by default, but you can uncomment the following line to find dead code)
-# npx ts-prune -error
+# Spell check every file using CSpell.
+# "--no-progress" and "--no-summary" make it only output errors.
+npx cspell --no-progress --no-summary .
 
-echo "Successfully linted in $SECONDS seconds."
+# Check for unused CSpell words.
+npx cspell-check-unused-words
+
+echo "Successfully linted $REPO_NAME in $SECONDS seconds."
