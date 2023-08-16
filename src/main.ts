@@ -14,6 +14,7 @@ import {
   getRoomVariant,
   isGreedMode,
   removeGridEntity,
+  setAllArrayElements,
   spawnGridEntityWithVariant,
 } from "isaacscript-common";
 import { mod } from "./mod";
@@ -31,50 +32,103 @@ let corpseDDSpawned = false;
 export function main(): void {
   initModConfigMenu();
 
-  mod.AddCallback(ModCallback.POST_PLAYER_INIT, postPlayerInit);
+  mod.AddCallback(ModCallback.POST_PLAYER_INIT, postPlayerInit); // 9
+  mod.AddCallback(ModCallback.POST_NPC_INIT, postNPCInit); // 27
+  mod.AddCallback(ModCallback.POST_NPC_DEATH, postNPCDeath); // 29
+
   mod.AddCallbackCustom(
     ModCallbackCustom.POST_NEW_LEVEL_REORDERED,
-    postNewLevel,
+    postNewLevelReordered,
   );
-  mod.AddCallback(ModCallback.POST_NPC_INIT, postNPCInit);
-  mod.AddCallbackCustom(ModCallbackCustom.POST_NEW_ROOM_REORDERED, postNewRoom);
-  mod.AddCallback(ModCallback.POST_NPC_DEATH, postNPCDeath);
+  mod.AddCallbackCustom(
+    ModCallbackCustom.POST_NEW_ROOM_REORDERED,
+    postNewRoomReordered,
+  );
 }
 
+// ModCallback.POST_PLAYER_INIT (9)
 function postPlayerInit() {
-  floorReseeded[0] = false;
-  floorReseeded[1] = false;
-  floorReseeded[2] = false;
-  floorReseeded[3] = false;
+  if (!isGreedMode()) {
+    return;
+  }
+
+  setAllArrayElements(floorReseeded, false);
 }
 
-function postNewLevel() {
-  if (isGreedMode()) {
-    const level = Game().GetLevel();
-    const stage = level.GetStage();
-    const stageType = level.GetStageType();
+// ModCallback.POST_NPC_INIT (27)
+function postNPCInit(npc: EntityNPC) {
+  if (!isGreedMode()) {
+    return;
+  }
 
-    if (
-      stage === 1 &&
-      (stageType === 0 || stageType === 1 || stageType === 2)
-    ) {
-      oldStage = stage;
-      oldStageType = stageType;
-    } else if (
-      (stage !== 1 &&
-        stage <= 5 &&
-        stageType !== 4 &&
-        stageType !== 5 &&
-        !floorReseeded[getEffectiveGreedModeStage() - 2] &&
-        !lastFloorReseeded) ||
-      (oldStage === stage - 1 &&
-        (oldStageType === 4 || oldStageType === 5) &&
-        floorReseeded[getEffectiveGreedModeStage() - 2])
-    ) {
-      reseed(stage, stageType, level);
-    } else {
-      lastFloorReseeded = false;
-    }
+  const level = Game().GetLevel();
+  const stage = level.GetStage();
+
+  if (npc.Type !== EntityType.PIN) {
+    return;
+  }
+
+  // Wormwood
+  if (stage === 4 && npc.Type === EntityType.PIN && npc.Variant === 3) {
+    const sprite = npc.GetSprite();
+    sprite.Load("gfx/wormwood_corpse.anm2", false);
+    sprite.ReplaceSpritesheet(0, "gfx/bosses/repentance/wormwood_corpse.png");
+    sprite.LoadGraphics();
+    sprite.Update();
+  }
+}
+
+// ModCallback.POST_NPC_DEATH (29)
+function postNPCDeath(npc: EntityNPC) {
+  if (!isGreedMode()) {
+    return;
+  }
+
+  const level = Game().GetLevel();
+  const stage = level.GetStage();
+  const stageType = level.GetStageType();
+
+  // Rotgut
+  if (
+    stage === 4 &&
+    stageType === StageType.REPENTANCE &&
+    npc.Type === EntityType.ROTGUT &&
+    npc.Variant === 2
+  ) {
+    rotgutDefeated = true;
+  }
+}
+
+// ModCallbackCustom.POST_NEW_LEVEL_REORDERED
+function postNewLevelReordered() {
+  if (!isGreedMode()) {
+    return;
+  }
+
+  const level = Game().GetLevel();
+  const stage = level.GetStage();
+  const stageType = level.GetStageType();
+
+  if (
+    stage === LevelStage.BASEMENT_GREED_MODE &&
+    (stageType === 0 || stageType === 1 || stageType === 2)
+  ) {
+    oldStage = stage;
+    oldStageType = stageType;
+  } else if (
+    (stage !== 1 &&
+      stage <= 5 &&
+      stageType !== 4 &&
+      stageType !== 5 &&
+      !floorReseeded[getEffectiveGreedModeStage() - 2] &&
+      !lastFloorReseeded) ||
+    (oldStage === stage - 1 &&
+      (oldStageType === 4 || oldStageType === 5) &&
+      floorReseeded[getEffectiveGreedModeStage() - 2])
+  ) {
+    reseed(stage, stageType, level);
+  } else {
+    lastFloorReseeded = false;
   }
 }
 
@@ -127,29 +181,6 @@ function reseed(stage: number, stageType: number, level: Level) {
   Isaac.ExecuteCommand("reseed");
 }
 
-function postNPCInit(npc: EntityNPC) {
-  const level = Game().GetLevel();
-  const stage = level.GetStage();
-
-  if (npc.Type !== EntityType.PIN) {
-    return;
-  }
-
-  // Wormwood
-  if (
-    isGreedMode() &&
-    stage === 4 &&
-    npc.Type === EntityType.PIN &&
-    npc.Variant === 3
-  ) {
-    const sprite = npc.GetSprite();
-    sprite.Load("gfx/wormwood_corpse.anm2", false);
-    sprite.ReplaceSpritesheet(0, "gfx/bosses/repentance/wormwood_corpse.png");
-    sprite.LoadGraphics();
-    sprite.Update();
-  }
-}
-
 function getEffectiveGreedModeStage(): number {
   const level = Game().GetLevel();
   const stage = level.GetStage();
@@ -162,7 +193,12 @@ function getEffectiveGreedModeStage(): number {
   return stage;
 }
 
-function postNewRoom() {
+// ModCallbackCustom.POST_NEW_ROOM_REORDERED
+function postNewRoomReordered() {
+  if (!isGreedMode()) {
+    return;
+  }
+
   const level = Game().GetLevel();
   const stage = level.GetStage();
   const stageType = level.GetStageType();
@@ -179,20 +215,13 @@ function postNewRoom() {
     level.GreedModeWave++;
   }
 
-  if (
-    isGreedMode() &&
-    stage === 4 &&
-    stageType === 4 &&
-    rotgutDefeated &&
-    !corpseDDSpawned
-  ) {
+  if (stage === 4 && stageType === 4 && rotgutDefeated && !corpseDDSpawned) {
     level.GreedModeWave++;
     room.TrySpawnDevilRoomDoor(true, true);
     corpseDDSpawned = true;
   }
 
   if (
-    isGreedMode() &&
     stage === 4 &&
     stageType === StageType.REPENTANCE &&
     rotgutDefeated &&
@@ -203,7 +232,6 @@ function postNewRoom() {
 
   // Respawn the Greed plate in case it was replaced by a trapdoor or a poop spawned by Clog.
   if (
-    isGreedMode() &&
     roomType === RoomType.DEFAULT &&
     stage === LevelStage.BASEMENT_GREED_MODE &&
     roomVariant > 999 &&
@@ -225,22 +253,5 @@ function postNewRoom() {
       PressurePlateVariant.GREED_PLATE,
       GREED_PLATE_GRID_INDEX,
     );
-  }
-}
-
-function postNPCDeath(npc: EntityNPC) {
-  const level = Game().GetLevel();
-  const stage = level.GetStage();
-  const stageType = level.GetStageType();
-
-  // Rotgut
-  if (
-    isGreedMode() &&
-    stage === 4 &&
-    stageType === StageType.REPENTANCE &&
-    npc.Type === EntityType.ROTGUT &&
-    npc.Variant === 2
-  ) {
-    rotgutDefeated = true;
   }
 }
