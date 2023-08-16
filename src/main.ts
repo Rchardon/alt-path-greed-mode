@@ -14,6 +14,7 @@ import {
   game,
   getGridEntities,
   getRoomVariant,
+  getStage,
   isGreedMode,
   isRepentanceStage,
   onRepentanceStage,
@@ -29,7 +30,7 @@ const GREED_PLATE_GRID_INDEX = 112;
 
 const v = {
   run: {
-    floorReseeded: [false, false, false, false],
+    floorsReseeded: new Set<LevelStage>(),
     oldStage: LevelStage.BASEMENT_GREED_MODE,
     oldStageType: StageType.ORIGINAL,
     lastFloorReseeded: false,
@@ -73,6 +74,7 @@ function postNewLevelReordered() {
   const level = game.GetLevel();
   const stage = level.GetStage();
   const stageType = level.GetStageType();
+  const effectiveGreedModeStage = getEffectiveGreedModeStage();
 
   if (
     stage === LevelStage.BASEMENT_GREED_MODE &&
@@ -86,11 +88,12 @@ function postNewLevelReordered() {
     (stage !== LevelStage.BASEMENT_GREED_MODE &&
       stage <= LevelStage.SHEOL_GREED_MODE &&
       !isRepentanceStage(stageType) &&
-      !v.run.floorReseeded[getEffectiveGreedModeStage() - 2] &&
+      !v.run.floorsReseeded.has(effectiveGreedModeStage) &&
       !v.run.lastFloorReseeded) ||
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
     (v.run.oldStage === stage - 1 &&
-      (v.run.oldStageType === 4 || v.run.oldStageType === 5) &&
-      v.run.floorReseeded[getEffectiveGreedModeStage() - 2])
+      isRepentanceStage(v.run.oldStageType) &&
+      v.run.floorsReseeded.has(effectiveGreedModeStage))
   ) {
     reseed(stage, stageType, level);
   } else {
@@ -101,6 +104,8 @@ function postNewLevelReordered() {
 function reseed(stage: LevelStage, stageType: StageType, level: Level) {
   const stage123StageTypes = [0, 1, 2, 4, 5];
   const stage5StageTypes = [0, 4];
+
+  const effectiveGreedModeStage = getEffectiveGreedModeStage();
 
   let newStageType = StageType.ORIGINAL;
 
@@ -146,14 +151,14 @@ function reseed(stage: LevelStage, stageType: StageType, level: Level) {
   } else if (
     stage === v.run.oldStage &&
     stageType === v.run.oldStageType &&
-    !v.run.floorReseeded[getEffectiveGreedModeStage() - 2]
+    !v.run.floorsReseeded.has(effectiveGreedModeStage)
   ) {
     newStage = newStageType === 4 || newStageType === 5 ? stage - 1 : stage;
   } else {
     newStage = v.run.oldStage + 1;
   }
 
-  v.run.floorReseeded[getEffectiveGreedModeStage() - 2] = true;
+  v.run.floorsReseeded.add(effectiveGreedModeStage);
   v.run.lastFloorReseeded = true;
 
   level.SetStage(newStage, newStageType);
@@ -163,10 +168,8 @@ function reseed(stage: LevelStage, stageType: StageType, level: Level) {
   Isaac.ExecuteCommand("reseed");
 }
 
-function getEffectiveGreedModeStage(): number {
-  const level = game.GetLevel();
-  const stage = level.GetStage();
-
+function getEffectiveGreedModeStage(): LevelStage {
+  const stage = getStage();
   return onRepentanceStage() ? stage + 1 : stage;
 }
 
@@ -192,8 +195,8 @@ function postNewRoomReordered() {
   }
 
   if (
-    stage === 4 &&
-    stageType === 4 &&
+    stage === LevelStage.WOMB_GREED_MODE &&
+    stageType === StageType.REPENTANCE &&
     v.run.rotgutDefeated &&
     !v.run.corpseDDSpawned
   ) {
@@ -203,7 +206,7 @@ function postNewRoomReordered() {
   }
 
   if (
-    stage === 4 &&
+    stage === LevelStage.WOMB_GREED_MODE &&
     stageType === StageType.REPENTANCE &&
     v.run.rotgutDefeated &&
     v.run.corpseDDSpawned
