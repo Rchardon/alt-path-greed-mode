@@ -40,4 +40,36 @@ npx cspell --no-progress --no-summary .
 # Check for unused CSpell words.
 npx cspell-check-unused-words
 
+# @template-customization-start
+
+# Check for base file updates.
+npx isaacscript check
+
+# Check for Windows-style line endings.
+WINDOWS_FILES=$(
+  grep \
+  --recursive \
+  --files-with-matches \
+  --binary \
+  --perl-regexp \
+  --exclude-dir='.git' \
+  --exclude-dir='.yarn' \
+  --exclude-dir='node_modules' \
+  --exclude='*.fnt' \
+  --exclude='*.jpg' \
+  --exclude='*.png' \
+  --exclude='*.pyc' \
+  --exclude='*.stb' \
+  --exclude='*.ttf' \
+  --exclude='*.wav' \
+  '\r$' .
+) || true
+if [[ $WINDOWS_FILES ]]; then
+  echo "Files with Windows line-endings were found:"
+  echo "$WINDOWS_FILES"
+  exit 1
+fi
+
+# @template-customization-end
+
 echo "Successfully linted $REPO_NAME in $SECONDS seconds."
