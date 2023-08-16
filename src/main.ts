@@ -1,13 +1,23 @@
 import {
+  ISCFeature,
+  ModCallbackCustom,
   getGridEntities,
   getRoomVariant,
   removeGridEntity,
-  saveDataManager,
-  saveDataManagerSave,
   spawnGridEntityWithVariant,
   upgradeMod,
 } from "isaacscript-common";
 import { Config } from "./types/Config";
+import {
+  Difficulty,
+  EntityType,
+  GridEntityType,
+  LevelStage,
+  ModCallback,
+  PressurePlateVariant,
+  RoomType,
+  StageType,
+} from "isaac-typescript-definitions";
 
 const MOD_NAME = "alt-path-greed-mode";
 const CATEGORY_NAME = "Alt Path Greed Mode";
@@ -25,25 +35,28 @@ const v = {
   corpseDDSpawned: false,
 };
 
-export const config = v.persistent.config;
+export const { config } = v.persistent;
+// Instantiate a new mod object, which grants the ability to add callback functions that correspond
+// to in-game events.
+const modVanilla = RegisterMod(MOD_NAME, 1);
+const features = [ISCFeature.SAVE_DATA_MANAGER] as const;
+const mod = upgradeMod(modVanilla, features);
 
 export function main(): void {
-  // Instantiate a new mod object, which grants the ability to add callback functions that
-  // correspond to in-game events
-  const modVanilla = RegisterMod(MOD_NAME, 1);
-  const mod = upgradeMod(modVanilla);
-
-  saveDataManager("modConfigMenu", v);
+  mod.saveDataManager("modConfigMenu", v);
 
   registerSubMenuConfig("Settings", SETTINGS);
 
-  mod.AddCallback(ModCallbacks.MC_POST_PLAYER_INIT, postPlayerInit);
-  mod.AddCallback(ModCallbacks.MC_POST_NEW_LEVEL, postNewLevel);
-  mod.AddCallback(ModCallbacks.MC_POST_NPC_INIT, postNPCInit);
-  mod.AddCallback(ModCallbacks.MC_POST_NEW_ROOM, postNewRoom);
-  mod.AddCallback(ModCallbacks.MC_POST_NPC_DEATH, postNPCDeath);
+  mod.AddCallback(ModCallback.POST_PLAYER_INIT, postPlayerInit);
+  mod.AddCallbackCustom(
+    ModCallbackCustom.POST_NEW_LEVEL_REORDERED,
+    postNewLevel,
+  );
+  mod.AddCallback(ModCallback.POST_NPC_INIT, postNPCInit);
+  mod.AddCallbackCustom(ModCallbackCustom.POST_NEW_ROOM_REORDERED, postNewRoom);
+  mod.AddCallback(ModCallback.POST_NPC_DEATH, postNPCDeath);
 
-  // Print an initialization message to the "log.txt" file
+  // Print an initialization message to the "log.txt" file.
   Isaac.DebugString(`${MOD_NAME} initialized.`);
 }
 
@@ -100,7 +113,7 @@ function reseed(stage: number, stageType: number, level: Level) {
     newStageType = stage123StageTypes[math.random(0, 4)] ?? 0;
   }
 
-  let newStage;
+  let newStage: int;
 
   if (v.oldStage === 4 && v.oldStageType === 4) {
     newStage = 6;
@@ -137,7 +150,7 @@ function postNPCInit(npc: EntityNPC) {
   const level = Game().GetLevel();
   const stage = level.GetStage();
 
-  if (npc.Type !== EntityType.ENTITY_PIN) {
+  if (npc.Type !== EntityType.PIN) {
     return;
   }
 
@@ -145,7 +158,7 @@ function postNPCInit(npc: EntityNPC) {
   if (
     Game().IsGreedMode() &&
     stage === 4 &&
-    npc.Type === EntityType.ENTITY_PIN &&
+    npc.Type === EntityType.PIN &&
     npc.Variant === 3
   ) {
     const sprite = npc.GetSprite();
@@ -182,7 +195,7 @@ function registerSubMenuConfig(
         }
 
         config[configName as keyof Config] = newValue as boolean;
-        saveDataManagerSave();
+        mod.saveDataManagerSave();
       },
       Info: [longDescription],
     });
@@ -249,8 +262,11 @@ function postNewRoom() {
   const GameDifficulty = Game().Difficulty;
   const roomVariant = getRoomVariant();
 
-  if (room.GetType() === 16 && (roomVariant === 1010 || roomVariant === 1020)) {
-    level.GreedModeWave += 1;
+  if (
+    room.GetType() === RoomType.DUNGEON &&
+    (roomVariant === 1010 || roomVariant === 1020)
+  ) {
+    level.GreedModeWave++;
   }
 
   if (
@@ -260,7 +276,7 @@ function postNewRoom() {
     v.rotgutDefeated &&
     !v.corpseDDSpawned
   ) {
-    level.GreedModeWave += 1;
+    level.GreedModeWave++;
     room.TrySpawnDevilRoomDoor(true, true);
     v.corpseDDSpawned = true;
   }
@@ -268,35 +284,34 @@ function postNewRoom() {
   if (
     Game().IsGreedMode() &&
     stage === 4 &&
-    stageType === 4 &&
+    stageType === StageType.REPENTANCE &&
     v.rotgutDefeated &&
     v.corpseDDSpawned
   ) {
-    level.GreedModeWave =
-      GameDifficulty === Difficulty.DIFFICULTY_GREEDIER ? 12 : 11;
+    level.GreedModeWave = GameDifficulty === Difficulty.GREEDIER ? 12 : 11;
   }
 
-  // Respawn the Greed plate in case it was replaced by a trapdoor or a poop spawned by Clog
+  // Respawn the Greed plate in case it was replaced by a trapdoor or a poop spawned by Clog.
   if (
-    roomType === 1 &&
+    roomType === RoomType.DEFAULT &&
     IsGreedMode &&
-    stage === LevelStage.STAGE1_GREED &&
+    stage === LevelStage.BASEMENT_GREED_MODE &&
     roomVariant > 999 &&
     ((numGreedWave <= 11 &&
       numGreedWave >= 10 &&
-      GameDifficulty === Difficulty.DIFFICULTY_GREEDIER) ||
+      GameDifficulty === Difficulty.GREEDIER) ||
       (numGreedWave <= 10 &&
         numGreedWave >= 9 &&
-        GameDifficulty === Difficulty.DIFFICULTY_GREED))
+        GameDifficulty === Difficulty.GREED))
   ) {
-    const gridPoops = getGridEntities(GridEntityType.GRID_POOP);
+    const gridPoops = getGridEntities(GridEntityType.POOP);
     for (const gridPoop of gridPoops) {
       if (gridPoop.GetGridIndex() === GREED_PLATE_GRID_INDEX) {
         removeGridEntity(gridPoop, true);
       }
     }
     spawnGridEntityWithVariant(
-      GridEntityType.GRID_PRESSURE_PLATE,
+      GridEntityType.PRESSURE_PLATE,
       PressurePlateVariant.GREED_PLATE,
       GREED_PLATE_GRID_INDEX,
     );
@@ -312,8 +327,8 @@ function postNPCDeath(npc: EntityNPC) {
   if (
     Game().IsGreedMode() &&
     stage === 4 &&
-    stageType === 4 &&
-    npc.Type === EntityType.ENTITY_ROTGUT &&
+    stageType === StageType.REPENTANCE &&
+    npc.Type === EntityType.ROTGUT &&
     npc.Variant === 2
   ) {
     v.rotgutDefeated = true;

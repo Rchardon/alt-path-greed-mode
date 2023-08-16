@@ -11,9 +11,13 @@
   ],
   "license": "GPL-3.0",
   "dependencies": {
-    "isaac-typescript-definitions": "^1.0.331",
-    "isaacscript": "^1.1.72",
-    "isaacscript-common": "^1.0.592",
-    "isaacscript-lint": "^1.0.79"
+    "isaac-typescript-definitions": "^13.0.25",
+    "isaacscript": "^3.7.2",
+    "isaacscript-common": "^31.0.2",
+    "isaacscript-lint": "^5.2.3",
+    "isaacscript-spell": "^1.2.41",
+    "isaacscript-tsconfig": "^4.0.0",
+    "typescript": "^5.1.6",
+    "typescript-to-lua": "^1.17.0"
   }
 }
