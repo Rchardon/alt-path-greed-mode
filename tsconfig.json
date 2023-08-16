@@ -31,4 +31,11 @@
     "noHeader": true,
     "noImplicitGlobalVariables": true,
   },
+
+  // IsaacScript settings
+  "isaacscript": {
+    // A list of objects that represent the custom stages that are in your mod, if any. See:
+    // https://isaacscript.github.io/main/custom-stages
+    "customStages": [],
+  },
 }
