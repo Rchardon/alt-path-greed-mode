@@ -15,6 +15,8 @@ import {
   getGridEntities,
   getRoomVariant,
   isGreedMode,
+  isRepentanceStage,
+  onRepentanceStage,
   onStage,
   onStageType,
   removeGridEntity,
@@ -28,8 +30,8 @@ const GREED_PLATE_GRID_INDEX = 112;
 const v = {
   run: {
     floorReseeded: [false, false, false, false],
-    oldStage: 0,
-    oldStageType: 0,
+    oldStage: LevelStage.BASEMENT_GREED_MODE,
+    oldStageType: StageType.ORIGINAL,
     lastFloorReseeded: false,
     rotgutDefeated: false,
     corpseDDSpawned: false,
@@ -81,10 +83,9 @@ function postNewLevelReordered() {
     v.run.oldStage = stage;
     v.run.oldStageType = stageType;
   } else if (
-    (stage !== 1 &&
-      stage <= 5 &&
-      stageType !== 4 &&
-      stageType !== 5 &&
+    (stage !== LevelStage.BASEMENT_GREED_MODE &&
+      stage <= LevelStage.SHEOL_GREED_MODE &&
+      !isRepentanceStage(stageType) &&
       !v.run.floorReseeded[getEffectiveGreedModeStage() - 2] &&
       !v.run.lastFloorReseeded) ||
     (v.run.oldStage === stage - 1 &&
@@ -97,31 +98,44 @@ function postNewLevelReordered() {
   }
 }
 
-function reseed(stage: number, stageType: number, level: Level) {
+function reseed(stage: LevelStage, stageType: StageType, level: Level) {
   const stage123StageTypes = [0, 1, 2, 4, 5];
   const stage5StageTypes = [0, 4];
 
-  let newStageType = 0;
+  let newStageType = StageType.ORIGINAL;
 
   if (config.altPathOnly) {
-    newStageType = stage === 4 ? 4 : math.random(4, 5);
-  } else if (v.run.oldStage === 4 && v.run.oldStageType === 4) {
+    newStageType =
+      stage === LevelStage.WOMB_GREED_MODE
+        ? LevelStage.WOMB_GREED_MODE
+        : math.random(4, 5);
+  } else if (
+    v.run.oldStage === LevelStage.WOMB_GREED_MODE &&
+    v.run.oldStageType === StageType.REPENTANCE
+  ) {
     newStageType = 0;
-  } else if (stage === 4 || stage === 5) {
+  } else if (
+    stage === LevelStage.WOMB_GREED_MODE ||
+    stage === LevelStage.SHEOL_GREED_MODE
+  ) {
     newStageType = stage5StageTypes[math.random(0, 1)] ?? 0;
   } else {
     newStageType = stage123StageTypes[math.random(0, 4)] ?? 0;
   }
 
-  let newStage: int;
+  let newStage: LevelStage;
 
-  if (v.run.oldStage === 4 && v.run.oldStageType === 4) {
-    newStage = 6;
+  if (
+    v.run.oldStage === LevelStage.WOMB_GREED_MODE &&
+    v.run.oldStageType === StageType.REPENTANCE
+  ) {
+    newStage = LevelStage.SHOP_GREED_MODE;
   } else if (
-    (newStageType === 4 || newStageType === 5) &&
-    (v.run.oldStageType === 0 ||
-      v.run.oldStageType === 1 ||
-      v.run.oldStageType === 2)
+    (newStageType === StageType.REPENTANCE ||
+      newStageType === StageType.REPENTANCE_B) &&
+    (v.run.oldStageType === StageType.ORIGINAL ||
+      v.run.oldStageType === StageType.WRATH_OF_THE_LAMB ||
+      v.run.oldStageType === StageType.AFTERBIRTH)
   ) {
     newStage = v.run.oldStage;
   } else if (
@@ -152,13 +166,8 @@ function reseed(stage: number, stageType: number, level: Level) {
 function getEffectiveGreedModeStage(): number {
   const level = game.GetLevel();
   const stage = level.GetStage();
-  const stageType = level.GetStageType();
 
-  if (stageType === 4 || stageType === 5) {
-    return stage + 1;
-  }
-
-  return stage;
+  return onRepentanceStage() ? stage + 1 : stage;
 }
 
 // ModCallbackCustom.POST_NEW_ROOM_REORDERED
@@ -253,7 +262,8 @@ function postNPCInitWormwood(npc: EntityNPC) {
     return;
   }
 
-  if (onStage(LevelStage.WOMB_GREED_MODE)) {
+  if (onStage(LevelStage.WOMB_GREED_MODE) && onRepentanceStage()) {
+    // Replace the normal wormwood graphics with the red wormwood spritesheet.
     const sprite = npc.GetSprite();
     sprite.Load("gfx/wormwood_corpse.anm2", false);
     sprite.ReplaceSpritesheet(0, "gfx/bosses/repentance/wormwood_corpse.png");
