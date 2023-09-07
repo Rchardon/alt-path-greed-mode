@@ -30,9 +30,6 @@
         [b]Clog spawned a poop on the greed button, i cannot launch last wave![/b]
         You'll have to exit and re-enter the room, the greed plate will reappear.
 
-        [b]I typed &quot;stage 1c&quot; in the console but i'm not in Downpour.[/b]
-        I use the &quot;reseed&quot; command once per floor, so you'll have to type your stage command twice, sorry about that.
-
         [b]Do you plan to add Cathedral ?[/b]
         No. Someone did it, you can find it [url=https://steamcommunity.com/sharedfiles/filedetails/?id=2813909722]here[/url] but it's not compatible with my mod.
 
@@ -46,7 +43,7 @@
 
         If there's some bugs or if you find some waves too easy or too hard, you can contact me on Discord (@Gamonymous)
     </description>
-    <version>1.21</version>
+    <version>1.22</version>
     <visibility>Public</visibility>
     <tag id="Rooms"/>
     <tag id="Floors"/>
